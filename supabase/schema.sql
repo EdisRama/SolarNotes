@@ -8,6 +8,10 @@ create table if not exists public.solar_notes_data (
     and coalesce(jsonb_typeof(data -> 'categories') = 'array', false)
     and coalesce(jsonb_typeof(data -> 'tasks') = 'array', false)
     and coalesce(jsonb_typeof(data -> 'events') = 'array', false)
+    and (
+      data -> 'folders' is null
+      or jsonb_typeof(data -> 'folders') = 'array'
+    )
   )
 );
 

@@ -1,7 +1,7 @@
 import { scheduleRemoteSave } from "./persistence.js";
 
 const STORAGE_KEY = "solar-notes:calendar-events:v1";
-const DATE_COLORS = ["#6f91d7", "#8990db", "#5d9bb5", "#a58bc7", "#789fc0", "#b28c91", "#728e9c"];
+const DATE_COLORS = ["#b8b8b8", "#d0d0d0", "#969696", "#e2e2e2", "#aaaaaa", "#c5c5c5", "#888888"];
 
 function dateKey(date) {
   const year = date.getFullYear();
@@ -281,6 +281,10 @@ export function createCalendar(container, options = {}) {
       dayButton.className = "calendar-cell";
       dayButton.classList.toggle("is-selected", key === selectedDay);
       dayButton.classList.toggle("is-today", key === dateKey(new Date()));
+      dayButton.classList.toggle(
+        "is-marked",
+        dayEvents.length + dayTasks.length + dayNotes.length > 0
+      );
       dayButton.setAttribute("aria-pressed", String(key === selectedDay));
       dayButton.setAttribute(
         "aria-label",

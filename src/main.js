@@ -27,6 +27,13 @@ import {
   showAuthErrorMessage
 } from "./auth.js";
 import { configurePersistence, hydrateLocalData, readLocalData } from "./persistence.js";
+import {
+  createFolder,
+  deleteFolder,
+  loadFolders,
+  persistFolders,
+  updateFolder
+} from "./folders.js";
 import "./styles.css";
 
 const container = document.querySelector("#solar-system");
@@ -35,6 +42,7 @@ const canvasPointer = { x: 0, y: 0, moved: false };
 let notes = [];
 let categories = [];
 let tasks = [];
+let folders = [];
 let solarScene;
 let planetSystem;
 let calendar;
@@ -94,7 +102,7 @@ function syncPlanetFilters() {
 
 function refreshData() {
   updateCategoryColors();
-  ui.setData({ notes, categories, tasks });
+  ui.setData({ notes, categories, tasks, folders });
   syncPlanetFilters();
   if (calendar) calendar.render();
 }
@@ -107,7 +115,8 @@ function exportData() {
     notes,
     categories: categories.map(({ name }) => ({ name })),
     tasks,
-    events: loadCalendarEvents()
+    events: loadCalendarEvents(),
+    folders
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -204,6 +213,70 @@ async function start() {
         ui.showMessage(error.message || "Kunde inte uppdatera anteckningen.", "error");
       }
     },
+    onUpdateNote(id, updates) {
+      const updatedNotes = updateNote(notes, id, updates);
+      persistNotes(updatedNotes);
+      notes = updatedNotes;
+      refreshData();
+      return true;
+    },
+    onDeleteNote(id) {
+      const updatedNotes = notes.filter((note) => note.id !== id);
+      persistNotes(updatedNotes);
+      const updatedFolders = folders.filter((folder) => folder.planetId !== id);
+      persistFolders(updatedFolders);
+      notes = updatedNotes;
+      folders = updatedFolders;
+      refreshData();
+      if (planetSystem) planetSystem.remove(id);
+    },
+    onCreateFolder(input) {
+      const updatedFolders = createFolder(folders, input);
+      persistFolders(updatedFolders);
+      folders = updatedFolders;
+      refreshData();
+    },
+    onRenameFolder(id, name) {
+      const updatedFolders = updateFolder(folders, id, { name });
+      persistFolders(updatedFolders);
+      folders = updatedFolders;
+      refreshData();
+    },
+    onMoveFolder(id, planetId) {
+      const updatedFolders = updateFolder(folders, id, { planetId });
+      persistFolders(updatedFolders);
+      folders = updatedFolders;
+      refreshData();
+    },
+    onSortFolder(id, direction) {
+      const folder = folders.find((item) => item.id === id);
+      if (!folder) return;
+      const siblings = folders
+        .filter((item) => item.planetId === folder.planetId)
+        .sort((a, b) => a.sortOrder - b.sortOrder);
+      const index = siblings.findIndex((item) => item.id === id);
+      const nextIndex = index + direction;
+      if (nextIndex < 0 || nextIndex >= siblings.length) return;
+      [siblings[index], siblings[nextIndex]] = [siblings[nextIndex], siblings[index]];
+      const order = new Map(siblings.map((item, orderIndex) => [item.id, orderIndex]));
+      const updatedFolders = folders.map((item) =>
+        order.has(item.id) ? { ...item, sortOrder: order.get(item.id) } : item
+      );
+      persistFolders(updatedFolders);
+      folders = updatedFolders;
+      refreshData();
+    },
+    onDeleteFolder(id) {
+      const updatedFolders = deleteFolder(folders, id);
+      persistFolders(updatedFolders);
+      const updatedNotes = notes.map((note) =>
+        note.folderId === id ? { ...note, folderId: "" } : note
+      );
+      persistNotes(updatedNotes);
+      folders = updatedFolders;
+      notes = updatedNotes;
+      refreshData();
+    },
     onCreateCategory(name) {
       const updatedCategories = createCategory(categories, name);
       persistCategories(updatedCategories);
@@ -220,9 +293,21 @@ async function start() {
       persistCategories(updatedCategories);
       persistTasks(updatedTasks);
       persistCalendarEvents(updatedEvents);
+      const importedFolders = Array.isArray(JSON.parse(source).folders)
+        ? JSON.parse(source).folders
+        : [];
+      const folderMap = new Map(folders.map((folder) => [folder.id, folder]));
+      importedFolders.forEach((folder) => {
+        if (folder && typeof folder.id === "string" && typeof folder.name === "string") {
+          folderMap.set(folder.id, folder);
+        }
+      });
+      const updatedFolders = Array.from(folderMap.values());
+      persistFolders(updatedFolders);
       notes = updatedNotes;
       categories = updatedCategories;
       tasks = updatedTasks;
+      folders = updatedFolders;
       if (calendar) calendar.setEvents(updatedEvents);
       if (planetSystem) {
         for (const [index, note] of notes.entries()) {
@@ -279,6 +364,7 @@ async function start() {
     notes = await loadNotes();
     tasks = loadTasks();
     categories = loadCategories(notes);
+    folders = loadFolders();
   } catch (error) {
     ui.showError(error.message || "Solar Notes kunde inte läsa in dina data.");
     throw error;

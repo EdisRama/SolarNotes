@@ -2,7 +2,8 @@ const STORAGE_KEYS = {
   notes: "solar-notes:v1",
   categories: "solar-notes:categories:v1",
   tasks: "solar-notes:tasks:v1",
-  events: "solar-notes:calendar-events:v1"
+  events: "solar-notes:calendar-events:v1",
+  folders: "solar-notes:folders:v1"
 };
 
 let saveToServer;
@@ -21,13 +22,18 @@ export function readLocalData() {
     notes: JSON.parse(notes),
     categories: readStoredValue(STORAGE_KEYS.categories, []),
     tasks: readStoredValue(STORAGE_KEYS.tasks, []),
-    events: readStoredValue(STORAGE_KEYS.events, [])
+    events: readStoredValue(STORAGE_KEYS.events, []),
+    folders: readStoredValue(STORAGE_KEYS.folders, [])
   };
 }
 
 export function hydrateLocalData(data) {
   for (const [name, key] of Object.entries(STORAGE_KEYS)) {
     const value = data[name];
+    if (name === "folders" && value === undefined) {
+      localStorage.setItem(key, "[]");
+      continue;
+    }
     if (!Array.isArray(value)) {
       throw new TypeError(`Serverns sparade ${name}-data har ett ogiltigt format.`);
     }

@@ -570,3 +570,91 @@ button.calendar-cell:hover { z-index: 1; border-color: rgba(133, 161, 222, 0.38)
   .auth-card { padding: 28px 22px; }
   .auth-eyebrow { margin-top: 30px; }
 }
+
+/* Monochrome premium surface */
+:root {
+  --bg: #070707;
+  --panel: rgba(18, 18, 18, 0.94);
+  --muted: #9a9a9a;
+  --line: rgba(255, 255, 255, 0.12);
+  --blue: #d4d4d4;
+  color: #f1f1f1;
+  background: #070707;
+}
+body, .app-shell, .main-workspace, .solar-system, .calendar-view, .content-workspace,
+.app-sidebar, .sidebar-brand, .sidebar-footer, .workspace-header {
+  background-color: #070707;
+  background-image: none;
+}
+.topbar, .workspace-header, .app-sidebar, .sidebar-brand, .sidebar-footer {
+  border-color: rgba(255,255,255,.1);
+}
+.search-box, .form-input, .button-secondary, .sidebar-link,
+.detail-panel, .note-dialog, .auth-card, .calendar-sidebar,
+.note-card, .task-row, .stat-card, .settings-section, .statistics-breakdown {
+  border-color: rgba(255,255,255,.13);
+  background: linear-gradient(145deg, rgba(22,22,22,.96), rgba(12,12,12,.96));
+  box-shadow: none;
+}
+.button-primary {
+  border-color: rgba(255,255,255,.42);
+  background: linear-gradient(135deg, #4a4a4a, #171717);
+  box-shadow: 0 8px 24px rgba(0,0,0,.38), inset 0 1px rgba(255,255,255,.12);
+  color: #fff;
+}
+.button-primary:hover, .sidebar-link.is-active {
+  background: linear-gradient(135deg, #595959, #252525);
+  border-color: rgba(255,255,255,.24);
+  box-shadow: inset 3px 0 #dedede;
+}
+.sidebar-link.is-active::before { background: #dddddd; box-shadow: 0 0 10px rgba(255,255,255,.24); }
+.brand-mark, .sidebar-brand .brand-mark { border-color: rgba(255,255,255,.58); box-shadow: 0 0 18px rgba(255,255,255,.08), inset 0 0 10px rgba(255,255,255,.06); }
+.brand-mark::before, .brand-mark::after { border-color: rgba(255,255,255,.46); }
+.brand-mark span { background: #dedede; box-shadow: 0 0 9px #fff; }
+.brand-copy strong span { color: #bdbdbd; }
+.planet-label { border-color: rgba(255,255,255,.18); color: #ededed; background: rgba(18,18,18,.88); box-shadow: 0 8px 24px rgba(0,0,0,.48); }
+.planet-label:hover { border-color: rgba(255,255,255,.58); box-shadow: 0 0 18px rgba(255,255,255,.12); }
+.detail-panel { top: 0; height: 100%; background: linear-gradient(145deg, rgba(20,20,20,.98), rgba(8,8,8,.98)); border-left-color: rgba(255,255,255,.13); }
+.detail-action, .icon-button, .calendar-nav-button, .calendar-today-button {
+  border-color: rgba(255,255,255,.14); color: #cfcfcf; background: rgba(255,255,255,.035);
+}
+.detail-action:hover, .detail-action.is-active { border-color: rgba(255,255,255,.38); background: rgba(255,255,255,.09); color: #fff; }
+.detail-action-danger { color: #d4d4d4; border-color: rgba(255,255,255,.18); }
+.category-pill, .tag-chip { border-color: rgba(255,255,255,.16); color: #d0d0d0; background: rgba(255,255,255,.06); }
+.calendar-cell { border-color: rgba(255,255,255,.11); background: linear-gradient(145deg, rgba(22,22,22,.82), rgba(8,8,8,.82)); }
+.calendar-cell:hover, .calendar-cell.is-selected { border-color: rgba(255,255,255,.5); background: linear-gradient(145deg, rgba(48,48,48,.82), rgba(18,18,18,.92)); box-shadow: 0 8px 22px rgba(0,0,0,.34), inset 0 0 0 1px rgba(255,255,255,.06); }
+.calendar-planet { filter: grayscale(1); }
+.calendar-event-indicator.has-events { width: 7px; height: 7px; background: #f0f0f0; box-shadow: 0 0 0 3px rgba(255,255,255,.08), 0 0 12px rgba(255,255,255,.5); }
+.calendar-cell.is-marked { border-color: rgba(255,255,255,.34); background: linear-gradient(145deg, rgba(58,58,58,.74), rgba(20,20,20,.92)); box-shadow: inset 0 0 18px rgba(255,255,255,.025), 0 7px 18px rgba(0,0,0,.24); }
+.calendar-cell.is-today:not(.is-selected) { border-color: rgba(255,255,255,.44); }
+.toast { border-color: rgba(255,255,255,.16); color: #ededed; background: rgba(24,24,24,.98); }
+.toast-error { border-color: rgba(255,255,255,.28); color: #fff; background: rgba(18,18,18,.98); }
+.auth-screen { background: radial-gradient(ellipse at 50% 42%, rgba(255,255,255,.06), transparent 44%), #070707; }
+.auth-card { box-shadow: 0 30px 100px rgba(0,0,0,.65); }
+.auth-card .form-input:focus { border-color: rgba(255,255,255,.58); box-shadow: 0 0 0 3px rgba(255,255,255,.08); }
+
+.planet-folder-header { display: flex; align-items: center; justify-content: space-between; margin: 10px 0 8px; }
+.folder-create-form { display: grid; grid-template-columns: 1fr auto; gap: 7px; margin-bottom: 9px; }
+.folder-create-form .form-input { min-height: 34px; }
+.folder-list { display: flex; max-height: 130px; flex-direction: column; gap: 5px; overflow-y: auto; margin-bottom: 10px; }
+.folder-empty { margin: 6px 0 10px; color: #777; font-size: 10px; }
+.folder-star-row { display: grid; grid-template-columns: 22px minmax(55px, 1fr) auto; align-items: center; gap: 6px; min-height: 38px; padding: 5px 7px; border: 1px solid rgba(255,255,255,.09); border-radius: 6px; background: rgba(255,255,255,.025); }
+.folder-star { color: #e8e8e8; text-align: center; text-shadow: 0 0 10px rgba(255,255,255,.4); }
+.folder-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #ddd; font-size: 11px; }
+.folder-actions { display: flex; align-items: center; gap: 3px; }
+.folder-actions button { min-width: 24px; height: 24px; padding: 0 5px; border: 1px solid rgba(255,255,255,.1); border-radius: 4px; color: #aaa; background: transparent; cursor: pointer; font-size: 9px; }
+.folder-actions button:hover { color: #fff; border-color: rgba(255,255,255,.35); }
+.folder-move-select { width: 78px; height: 24px; border: 1px solid rgba(255,255,255,.1); border-radius: 4px; color: #aaa; background: #141414; font-size: 9px; }
+.folder-remove { color: #bbb !important; }
+.planet-editor { min-height: 145px; }
+.editor-status-row { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+.editor-save-status { color: #8f8f8f; font: 9px var(--mono); }
+.editor-save-status.is-saving { color: #c4c4c4; }
+.editor-save-status.is-saved { color: #ededed; }
+.editor-save-status.is-error { color: #fff; }
+
+@media (max-width: 760px) {
+  .folder-list { max-height: 92px; }
+  .planet-editor { min-height: 100px; }
+  .folder-move-select { width: 62px; }
+}

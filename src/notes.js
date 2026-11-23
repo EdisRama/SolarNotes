@@ -54,6 +54,9 @@ function normalizeNote(note, index = 0) {
       ? note.relatedIds.filter((id) => typeof id === "string")
       : [],
     moons: Array.isArray(note.moons) ? note.moons : [],
+    planetId: typeof note.planetId === "string" ? note.planetId : "",
+    folderId: typeof note.folderId === "string" ? note.folderId : "",
+    date: typeof note.date === "string" ? note.date : "",
     systemId: typeof note.systemId === "string" ? note.systemId : DEFAULT_SYSTEM_ID,
     source: typeof note.source === "string" ? note.source : "manual",
     createdAt,

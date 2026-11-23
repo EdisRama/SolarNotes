@@ -4,7 +4,8 @@ const DATA_KEYS = [
   "solar-notes:v1",
   "solar-notes:categories:v1",
   "solar-notes:tasks:v1",
-  "solar-notes:calendar-events:v1"
+  "solar-notes:calendar-events:v1",
+  "solar-notes:folders:v1"
 ];
 let supabase;
 

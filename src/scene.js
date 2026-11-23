@@ -20,10 +20,10 @@ function createStars({ count, minRadius, maxRadius, size, opacity, seed }) {
   const colors = new Float32Array(count * 3);
   const random = createRandom(seed);
   const colorChoices = [
-    new THREE.Color("#a8b8ff"),
-    new THREE.Color("#e6d9ff"),
+    new THREE.Color("#c8c8c8"),
+    new THREE.Color("#e6e6e6"),
     new THREE.Color("#ffffff"),
-    new THREE.Color("#84cfff")
+    new THREE.Color("#a4a4a4")
   ];
 
   for (let index = 0; index < count; index += 1) {
@@ -107,8 +107,8 @@ function createNebulaTexture(color) {
 
 function createNebulae(scene, lowPower) {
   const configs = [
-    { color: "#526fb9", position: [-62, 18, -118], size: [72, 42], opacity: 0.22 },
-    { color: "#8262ad", position: [74, -25, -142], size: [92, 54], opacity: 0.17 }
+    { color: "#737373", position: [-62, 18, -118], size: [72, 42], opacity: 0.22 },
+    { color: "#9a9a9a", position: [74, -25, -142], size: [92, 54], opacity: 0.17 }
   ];
   const nebulae = configs.map((config) => {
     const sprite = new THREE.Sprite(
@@ -171,10 +171,10 @@ function createSolarSurfaceMaterial() {
   return new THREE.ShaderMaterial({
     uniforms: {
       uTime: { value: 0 },
-      deepColor: { value: new THREE.Color("#b62920") },
-      orangeColor: { value: new THREE.Color("#f56b24") },
-      goldColor: { value: new THREE.Color("#ffc45c") },
-      hotColor: { value: new THREE.Color("#fff1b0") }
+      deepColor: { value: new THREE.Color("#262626") },
+      orangeColor: { value: new THREE.Color("#777777") },
+      goldColor: { value: new THREE.Color("#b8b8b8") },
+      hotColor: { value: new THREE.Color("#eeeeee") }
     },
     vertexShader: `
       varying vec3 vSurfacePosition;
@@ -264,7 +264,7 @@ function createSolarFlares(sun) {
     const curve = new THREE.CatmullRomCurve3(points);
     const geometry = new THREE.TubeGeometry(curve, 44, index === 0 ? 0.022 : 0.016, 5, false);
     const material = new THREE.MeshBasicMaterial({
-      color: index === 1 ? "#ff9d55" : "#ffd27a",
+      color: index === 1 ? "#a8a8a8" : "#dddddd",
       transparent: true,
       opacity: 0.62,
       blending: THREE.AdditiveBlending,
@@ -284,32 +284,32 @@ function createSun(scene) {
 
   const corona = new THREE.Mesh(
     new THREE.SphereGeometry(1.88, 48, 48),
-    createFresnelMaterial("#ffb45c", 0.42, 2.2)
+    createFresnelMaterial("#bcbcbc", 0.42, 2.2)
   );
   sun.add(corona);
 
   const glow = new THREE.Mesh(
     new THREE.SphereGeometry(2.12, 48, 48),
-    createFresnelMaterial("#ff9c4c", 0.2, 1.6)
+    createFresnelMaterial("#a5a5a5", 0.2, 1.6)
   );
   sun.add(glow);
   const outerGlow = new THREE.Mesh(
     new THREE.SphereGeometry(2.4, 48, 48),
-    createFresnelMaterial("#d86a54", 0.075, 1.35)
+    createFresnelMaterial("#777777", 0.075, 1.35)
   );
   sun.add(outerGlow);
   createSolarFlares(sun);
   scene.add(sun);
 
-  const light = new THREE.PointLight("#ffd19a", 220, 100, 2);
+  const light = new THREE.PointLight("#dddddd", 220, 100, 2);
   scene.add(light);
   return { sun, core };
 }
 
 export function createSolarScene(container, initialQuality = "auto") {
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color("#070811");
-  scene.fog = new THREE.FogExp2("#070811", 0.0022);
+  scene.background = new THREE.Color("#050505");
+  scene.fog = new THREE.FogExp2("#050505", 0.0022);
 
   const camera = new THREE.PerspectiveCamera(44, 1, 0.1, 300);
   camera.position.set(0, 10, 21);
@@ -338,7 +338,7 @@ export function createSolarScene(container, initialQuality = "auto") {
   controls.maxPolarAngle = Math.PI * 0.82;
   controls.target.set(0, 0, 0);
 
-  const ambient = new THREE.AmbientLight("#8192d8", 0.27);
+  const ambient = new THREE.AmbientLight("#a8a8a8", 0.27);
   scene.add(ambient);
   const { sun, core } = createSun(scene);
   const starLayers = createStarfield(scene, lowPower);

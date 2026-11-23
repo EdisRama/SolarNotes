@@ -15,6 +15,13 @@ export function createUI({
   onClose,
   onNavigate,
   onToggleNote,
+  onUpdateNote,
+  onDeleteNote,
+  onCreateFolder,
+  onRenameFolder,
+  onMoveFolder,
+  onSortFolder,
+  onDeleteFolder,
   onCreateCategory,
   onImport,
   onExport,
@@ -39,8 +46,9 @@ export function createUI({
   const titleInput = document.querySelector("#note-title");
   const categoryList = document.querySelector("#category-list");
   const fileInput = document.querySelector("#import-notes-file");
-  const state = { workspace: "universe", filter: "all", category: null, notes: [], categories: [], tasks: [] };
+  const state = { workspace: "universe", filter: "all", category: null, notes: [], categories: [], tasks: [], folders: [] };
   let toastTimer;
+  let editorSaveTimer;
   let modalOpener;
   let activeNoteId = null;
   let categoriesExpanded = true;
@@ -138,7 +146,7 @@ export function createUI({
     for (const note of notes) {
       const card = document.createElement("article");
       card.className = "note-card";
-      const color = note.categoryColor || "#8799bf";
+      const color = note.categoryColor || "#b4b4b4";
       card.style.setProperty("--category-color", color);
       const top = document.createElement("div");
       top.className = "note-card-top";
@@ -337,21 +345,94 @@ export function createUI({
     categoryList.classList.toggle("is-collapsed", !categoriesExpanded);
   }
 
-  function setData({ notes = state.notes, categories = state.categories, tasks = state.tasks }) {
+  function setData({ notes = state.notes, categories = state.categories, tasks = state.tasks, folders = state.folders }) {
     state.categories = categories;
     state.notes = notes.map((note) => ({
       ...note,
       tags: Array.isArray(note.tags) ? note.tags : [],
       categoryColor:
         categories.find((category) => category.name.toLocaleLowerCase("sv") === note.category.toLocaleLowerCase("sv"))
-          ?.color || "#8799bf"
+          ?.color || "#b4b4b4"
     }));
     state.tasks = tasks;
+    state.folders = folders;
     renderCategories(categories);
     renderData();
     if (activeNoteId) {
       const activeNote = state.notes.find((note) => note.id === activeNoteId);
-      if (activeNote) updateDetailActions(activeNote);
+      if (activeNote) {
+        updateDetailActions(activeNote);
+        renderPlanetFolders(activeNote.id);
+      }
+    }
+  }
+
+  function renderPlanetFolders(planetId) {
+    const list = document.querySelector("#planet-folder-list");
+    list.replaceChildren();
+    const folders = state.folders
+      .filter((folder) => folder.planetId === planetId)
+      .sort((a, b) => a.sortOrder - b.sortOrder);
+    if (folders.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "folder-empty";
+      empty.textContent = "Inga stjärnmappar ännu.";
+      list.append(empty);
+      return;
+    }
+    for (const folder of folders) {
+      const row = document.createElement("div");
+      row.className = "folder-star-row";
+      const star = document.createElement("span");
+      star.className = "folder-star";
+      star.textContent = "✦";
+      const name = document.createElement("span");
+      name.className = "folder-name";
+      name.textContent = folder.name;
+      name.title = folder.name;
+      const actions = document.createElement("div");
+      actions.className = "folder-actions";
+      const move = document.createElement("select");
+      move.className = "folder-move-select";
+      move.setAttribute("aria-label", `Flytta mappen ${folder.name}`);
+      for (const planet of state.notes.filter((item) => !item.archived)) {
+        const option = document.createElement("option");
+        option.value = planet.id;
+        option.textContent = planet.title;
+        option.selected = planet.id === planetId;
+        move.append(option);
+      }
+      move.addEventListener("change", () => onMoveFolder(folder.id, move.value));
+      const up = document.createElement("button");
+      up.type = "button";
+      up.textContent = "↑";
+      up.setAttribute("aria-label", `Flytta mappen ${folder.name} upp`);
+      up.addEventListener("click", () => onSortFolder(folder.id, -1));
+      const down = document.createElement("button");
+      down.type = "button";
+      down.textContent = "↓";
+      down.setAttribute("aria-label", `Flytta mappen ${folder.name} ned`);
+      down.addEventListener("click", () => onSortFolder(folder.id, 1));
+      const rename = document.createElement("button");
+      rename.type = "button";
+      rename.textContent = "Namn";
+      rename.addEventListener("click", () => {
+        const nextName = window.prompt("Nytt mappnamn", folder.name);
+        if (nextName && nextName.trim()) onRenameFolder(folder.id, nextName.trim());
+      });
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "folder-remove";
+      remove.textContent = "×";
+      remove.setAttribute("aria-label", `Ta bort mappen ${folder.name}`);
+      remove.addEventListener("click", () => {
+        if (window.confirm(`Ta bort mappen "${folder.name}"? Anteckningar flyttas ut ur mappen.`)) {
+          onDeleteFolder(folder.id);
+        }
+      });
+      actions.append(move, up, down, rename, remove);
+      row.append(star, name, actions);
+      list.append(row);
     }
   }
 
@@ -361,20 +442,14 @@ export function createUI({
     const category = document.querySelector("#detail-category");
     category.textContent = note.category;
     category.style.setProperty("--category-color", color);
-    document.querySelector("#detail-content").textContent = note.content;
+    document.querySelector("#detail-title-input").value = note.title;
+    document.querySelector("#detail-content-input").value = note.content;
+    document.querySelector("#editor-save-status").textContent = "Allt sparat";
     document.querySelector("#detail-orb").style.setProperty("--orb-color", color);
-    const tags = document.querySelector("#detail-tags");
-    tags.replaceChildren();
-    for (const tag of note.tags) {
-      const chip = document.createElement("span");
-      chip.className = "tag-chip";
-      chip.textContent = tag;
-      tags.append(chip);
-    }
-    tags.hidden = note.tags.length === 0;
     document.querySelector("#detail-importance").textContent =
       ["LÅG", "NORMAL", "HÖG"][note.importance - 1] || "NORMAL";
     updateDetailActions(note);
+    renderPlanetFolders(note.id);
     panel.hidden = false;
     panel.classList.remove("panel-enter");
     void panel.offsetWidth;
@@ -455,6 +530,19 @@ export function createUI({
   });
   document.querySelector("#new-note-button").addEventListener("click", () => {
     formError.hidden = true;
+    const folderSelect = document.querySelector("#note-folder");
+    folderSelect.replaceChildren();
+    const none = document.createElement("option");
+    none.value = "";
+    none.textContent = "Ingen mapp";
+    folderSelect.append(none);
+    for (const folder of [...state.folders].sort((a,b) => a.sortOrder-b.sortOrder)) {
+      const planet = state.notes.find((note) => note.id === folder.planetId);
+      const option = document.createElement("option");
+      option.value = folder.id;
+      option.textContent = `${planet ? planet.title : "Planet"} · ${folder.name}`;
+      folderSelect.append(option);
+    }
     openModal(modal, titleInput);
   });
   document.querySelector("#close-modal").addEventListener("click", () => closeModal(modal, form));
@@ -470,7 +558,8 @@ export function createUI({
       category: document.querySelector("#note-category").value,
       content: document.querySelector("#note-content").value,
       tags,
-      importance: Number(document.querySelector("#note-importance").value)
+      importance: Number(document.querySelector("#note-importance").value),
+      folderId: document.querySelector("#note-folder").value
     };
     try {
       onCreate(input);
@@ -492,6 +581,59 @@ export function createUI({
     if (activeNoteId) {
       const note = state.notes.find((item) => item.id === activeNoteId);
       if (note) onToggleNote(activeNoteId, "archived");
+    }
+  });
+  const titleEditor = document.querySelector("#detail-title-input");
+  const contentEditor = document.querySelector("#detail-content-input");
+  function scheduleEditorSave() {
+    if (!activeNoteId) return;
+    const status = document.querySelector("#editor-save-status");
+    status.textContent = "Sparar...";
+    status.className = "editor-save-status is-saving";
+    window.clearTimeout(editorSaveTimer);
+    editorSaveTimer = window.setTimeout(() => {
+      try {
+        onUpdateNote(activeNoteId, {
+          title: titleEditor.value.trim() || "Namnlös planet",
+          content: contentEditor.value,
+          date: new Date().toISOString().slice(0, 10)
+        });
+        document.querySelector("#detail-title").textContent = titleEditor.value.trim() || "Namnlös planet";
+        status.textContent = "Sparat";
+        status.className = "editor-save-status is-saved";
+      } catch (error) {
+        status.textContent = "Kunde inte spara";
+        status.className = "editor-save-status is-error";
+        showMessage(error.message || "Ändringen kunde inte sparas.", "error");
+      }
+    }, 650);
+  }
+  titleEditor.addEventListener("input", scheduleEditorSave);
+  contentEditor.addEventListener("input", scheduleEditorSave);
+  document.querySelector("#delete-note-button").addEventListener("click", () => {
+    if (!activeNoteId) return;
+    const note = state.notes.find((item) => item.id === activeNoteId);
+    if (note && window.confirm(`Ta bort planeten "${note.title}" och dess anteckning?`)) {
+      onDeleteNote(activeNoteId);
+      closeDetails();
+    }
+  });
+  document.querySelector("#new-folder-button").addEventListener("click", () => {
+    const form = document.querySelector("#folder-create-form");
+    form.hidden = !form.hidden;
+    if (!form.hidden) document.querySelector("#folder-name").focus();
+  });
+  document.querySelector("#folder-create-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (!activeNoteId) return;
+    const input = document.querySelector("#folder-name");
+    try {
+      onCreateFolder({ planetId: activeNoteId, name: input.value });
+      input.value = "";
+      event.currentTarget.hidden = true;
+      showMessage("Stjärnmappen har skapats.");
+    } catch (error) {
+      showMessage(error.message || "Kunde inte skapa mappen.", "error");
     }
   });
 

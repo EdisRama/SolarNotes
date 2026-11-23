@@ -1,17 +1,17 @@
 import * as THREE from "three";
 
 const CATEGORY_COLORS = {
-  javascript: "#f4d15b",
-  programming: "#648cff",
-  history: "#f0a35f",
-  school: "#a78bfa",
-  science: "#50ddf5",
-  personal: "#ef8bbd",
-  ideas: "#83d6a5",
-  work: "#f29b62",
-  design: "#f58acc"
+  javascript: "#d7d7d7",
+  programming: "#a6a6a6",
+  history: "#c2c2c2",
+  school: "#8f8f8f",
+  science: "#ededed",
+  personal: "#b8b8b8",
+  ideas: "#dcdcdc",
+  work: "#9d9d9d",
+  design: "#c9c9c9"
 };
-const FALLBACK_COLORS = ["#9b8cff", "#55c8e8", "#f38dbb", "#84d9b2", "#f0b968", "#799fff"];
+const FALLBACK_COLORS = ["#d8d8d8", "#b4b4b4", "#eeeeee", "#9a9a9a", "#c7c7c7", "#a8a8a8"];
 const PLANETS_PER_ORBIT = 4;
 const INNER_ORBIT_RADIUS = 5.2;
 const PLANET_RADII = { 1: 0.48, 2: 0.62, 3: 0.8 };
@@ -46,7 +46,7 @@ function createPlanetTexture(color, seed, category) {
   const gradient = context.createLinearGradient(0, 0, canvas.width, canvas.height);
   gradient.addColorStop(0, baseColor.clone().lerp(new THREE.Color("#ffffff"), 0.38).getStyle());
   gradient.addColorStop(0.48, baseColor.getStyle());
-  gradient.addColorStop(1, baseColor.clone().lerp(new THREE.Color("#060916"), 0.68).getStyle());
+  gradient.addColorStop(1, baseColor.clone().lerp(new THREE.Color("#050505"), 0.68).getStyle());
   context.fillStyle = gradient;
   context.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -74,7 +74,7 @@ function createPlanetTexture(color, seed, category) {
       const y = random() * canvas.height;
       const radiusX = 12 + random() * 27;
       const radiusY = radiusX * (0.34 + random() * 0.24);
-      const stormColor = `#${baseColor.clone().lerp(new THREE.Color("#f7d8bd"), random() * 0.45).getHexString()}`;
+      const stormColor = `#${baseColor.clone().lerp(new THREE.Color("#dddddd"), random() * 0.45).getHexString()}`;
       const gradient = context.createRadialGradient(x, y, radiusY * 0.08, x, y, radiusX);
       gradient.addColorStop(0, "rgba(255,239,216,0.34)");
       gradient.addColorStop(0.42, `${stormColor}88`);
@@ -305,7 +305,7 @@ export function createPlanetSystem(scene, labelLayer) {
 
     let orbit = orbits.get(orbitIndex);
     if (!orbit) {
-      orbit = createOrbit(orbitRadius, "#766faa");
+      orbit = createOrbit(orbitRadius, "#777777");
       orbits.set(orbitIndex, orbit);
     }
 
@@ -483,8 +483,18 @@ export function createPlanetSystem(scene, labelLayer) {
     for (const entry of entries.values()) entry.selected = entry.note.id === id;
   }
 
+  function remove(id) {
+    const entry = entries.get(id);
+    if (!entry) return;
+    scene.remove(entry.mesh);
+    entry.label.remove();
+    entry.mesh.material?.dispose();
+    entries.delete(id);
+  }
+
   return {
     add,
+    remove,
     updateNote,
     update,
     setSearch,
