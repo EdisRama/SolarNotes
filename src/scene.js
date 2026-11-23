@@ -355,6 +355,8 @@ export function createSolarScene(container, initialQuality = "auto") {
   controls.addEventListener("start", () => {
     controls.autoRotate = false;
   });
+  const neutralCameraPosition = camera.position.clone();
+  const neutralTarget = controls.target.clone();
 
   const ambient = new THREE.AmbientLight("#a8a8a8", 0.27);
   scene.add(ambient);
@@ -413,15 +415,17 @@ export function createSolarScene(container, initialQuality = "auto") {
 
   let focusTarget = null;
   let focusCamera = null;
+  let resumeAutoRotateAfterFocus = false;
 
   function resetCamera() {
-    focusTarget = null;
-    focusCamera = null;
-    controls.reset();
-    controls.autoRotate = true;
+    focusTarget = neutralTarget.clone();
+    focusCamera = neutralCameraPosition.clone();
+    resumeAutoRotateAfterFocus = true;
+    controls.autoRotate = false;
   }
 
   function focus(position, distance = 9) {
+    resumeAutoRotateAfterFocus = false;
     controls.autoRotate = false;
     const direction = camera.position.clone().sub(controls.target).normalize();
     if (direction.lengthSq() === 0) direction.set(0, 0.35, 1);
@@ -442,6 +446,11 @@ export function createSolarScene(container, initialQuality = "auto") {
       camera.position.copy(focusCamera);
       focusTarget = null;
       focusCamera = null;
+      if (resumeAutoRotateAfterFocus) {
+        resumeAutoRotateAfterFocus = false;
+        controls.reset();
+        controls.autoRotate = true;
+      }
     }
   }
 
