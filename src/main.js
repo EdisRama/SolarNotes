@@ -221,7 +221,12 @@ async function start() {
       return true;
     },
     onDeleteNote(id) {
-      const updatedNotes = notes.filter((note) => note.id !== id);
+      const removedFolderIds = new Set(
+        folders.filter((folder) => folder.planetId === id).map((folder) => folder.id)
+      );
+      const updatedNotes = notes
+        .filter((note) => note.id !== id)
+        .map((note) => removedFolderIds.has(note.folderId) ? { ...note, folderId: "" } : note);
       persistNotes(updatedNotes);
       const updatedFolders = folders.filter((folder) => folder.planetId !== id);
       persistFolders(updatedFolders);

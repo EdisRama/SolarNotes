@@ -190,7 +190,27 @@ export function createUI({
       archive.type = "button";
       archive.textContent = note.archived ? "Återställ" : "Arkivera";
       archive.addEventListener("click", () => onToggleNote(note.id, "archived"));
-      actions.append(favorite, archive);
+      const edit = document.createElement("button");
+      edit.type = "button";
+      edit.textContent = "Redigera";
+      edit.setAttribute("aria-label", `Redigera anteckningen ${note.title}`);
+      edit.addEventListener("click", () => onSelect(note.id));
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "note-card-delete";
+      remove.textContent = "Ta bort";
+      remove.setAttribute("aria-label", `Ta bort anteckningen ${note.title}`);
+      remove.addEventListener("click", () => {
+        if (!window.confirm(`Ta bort anteckningen "${note.title}" permanent?`)) return;
+        try {
+          onDeleteNote(note.id);
+          if (activeNoteId === note.id) closeDetails();
+          showMessage("Anteckningen har tagits bort.");
+        } catch (error) {
+          showMessage(error.message || "Kunde inte ta bort anteckningen.", "error");
+        }
+      });
+      actions.append(favorite, archive, edit, remove);
       card.append(actions);
       target.append(card);
     }
