@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Solar Notes — utforska och organisera ditt kunskapsuniversum." />
+    <meta name="theme-color" content="#07080c" />
+    <title>Solar Notes — Explore Your Own Universe</title>
+  </head>
+  <body>
+    <div class="app-shell" id="app-shell" hidden>
+      <aside class="app-sidebar" id="app-sidebar" aria-label="Huvudnavigering">
+        <div class="sidebar-brand">
+          <a class="brand" href="#" aria-label="Solar Notes startsida">
+            <span class="brand-mark" aria-hidden="true"><span></span></span>
+            <span class="brand-copy">
+              <strong>solar<span>notes</span></strong>
+              <small>PERSONAL KNOWLEDGE SYSTEM</small>
+            </span>
+          </a>
+          <button class="sidebar-collapse" id="sidebar-collapse" type="button" aria-label="Fäll ihop sidopanelen" title="Fäll ihop sidopanelen">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5 7 12l7 7M18 5v14"></path></svg>
+          </button>
+        </div>
+
+        <div class="sidebar-scroll">
+          <p class="sidebar-section-label">ARBETS YTOR</p>
+          <nav class="sidebar-nav" aria-label="Arbetsytor">
+            <button class="sidebar-link is-active" data-workspace="universe" type="button" title="Universum">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.2"></circle><ellipse cx="12" cy="12" rx="9" ry="4.3" transform="rotate(-28 12 12)"></ellipse><circle cx="19.3" cy="7.5" r="1"></circle></svg>
+              <span>Universum</span><kbd>1</kbd>
+            </button>
+            <button class="sidebar-link" data-workspace="calendar" type="button" title="Kalender">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2"></rect><path d="M7.5 3v4M16.5 3v4M4 9.5h16M8 13h2M14 13h2M8 17h2"></path></svg>
+              <span>Kalender</span><kbd>2</kbd>
+            </button>
+            <button class="sidebar-link" data-workspace="tasks" type="button" title="Uppgifter">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 7 2 2 4-4M12 7h8M4 17l2 2 4-4M12 17h8"></path></svg>
+              <span>Uppgifter</span><span class="nav-count" id="task-nav-count">0</span>
+            </button>
+            <button class="sidebar-link" data-workspace="projects" type="button" title="Projekt">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5h6l2 2h9v9a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"></path><path d="M3.5 7.5v-2a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v2"></path></svg>
+              <span>Projekt</span>
+            </button>
+            <button class="sidebar-link" data-workspace="library" data-filter="library" type="button" title="Anteckningsbibliotek">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h12a2 2 0 0 1 2 2v13H7a2 2 0 0 1-2-2z"></path><path d="M5 17.5a2 2 0 0 1 2-2h12M9 8h6M9 11h6"></path></svg>
+              <span>Anteckningar</span>
+            </button>
+            <button class="sidebar-link" data-workspace="statistics" type="button" title="Statistik">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"></path></svg>
+              <span>Statistik</span>
+            </button>
+          </nav>
+
+          <div class="sidebar-divider"></div>
+          <p class="sidebar-section-label">ORGANISERA</p>
+          <nav class="sidebar-nav compact-nav" aria-label="Anteckningsfilter">
+            <button class="sidebar-link" data-workspace="library" data-filter="all" type="button" title="Alla anteckningar">
+              <span class="nav-glyph glyph-all">✦</span><span>Alla anteckningar</span><span class="nav-count" id="all-note-count">0</span>
+            </button>
+            <button class="sidebar-link" data-workspace="library" data-filter="favorites" type="button" title="Favoriter">
+              <span class="nav-glyph glyph-favorite">☆</span><span>Favoriter</span><span class="nav-count" id="favorite-count">0</span>
+            </button>
+            <button class="sidebar-link" data-workspace="library" data-filter="recent" type="button" title="Nyligen ändrade">
+              <span class="nav-glyph glyph-recent">◷</span><span>Nyligen ändrade</span>
+            </button>
+            <button class="sidebar-link" data-workspace="library" data-filter="archived" type="button" title="Arkiv">
+              <span class="nav-glyph glyph-archive">⌑</span><span>Arkiv</span><span class="nav-count" id="archive-count">0</span>
+            </button>
+          </nav>
+
+          <div class="sidebar-divider"></div>
+          <div class="category-section">
+            <button class="sidebar-section-toggle" id="categories-toggle" type="button" aria-expanded="true">
+              <span class="sidebar-section-label">KATEGORIER</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"></path></svg>
+            </button>
+            <nav class="sidebar-nav category-nav" id="category-list" aria-label="Kategorier"></nav>
+            <button class="sidebar-link add-category-link" id="new-category-button" type="button">
+              <span class="nav-glyph add-category-glyph">+</span><span>Ny kategori</span>
+            </button>
+          </div>
+        </div>
+
+        <footer class="sidebar-footer">
+          <div class="sidebar-footer-actions">
+            <button class="sidebar-link" data-workspace="settings" type="button" title="Inställningar">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="m19.4 15 .1.1a1.8 1.8 0 1 1-2.5 2.5l-.1-.1a1.8 1.8 0 0 0-3 .9v.2a1.8 1.8 0 1 1-3.6 0v-.2a1.8 1.8 0 0 0-3-.9l-.1.1a1.8 1.8 0 1 1-2.5-2.5l.1-.1a1.8 1.8 0 0 0-.9-3H3.7a1.8 1.8 0 1 1 0-3.6h.2a1.8 1.8 0 0 0 .9-3l-.1-.1a1.8 1.8 0 1 1 2.5-2.5l.1.1a1.8 1.8 0 0 0 3-.9v-.2a1.8 1.8 0 1 1 3.6 0v.2a1.8 1.8 0 0 0 3 .9l.1-.1a1.8 1.8 0 1 1 2.5 2.5l-.1.1a1.8 1.8 0 0 0 .9 3h.2a1.8 1.8 0 1 1 0 3.6h-.2a1.8 1.8 0 0 0-.9 3Z"></path></svg>
+              <span>Inställningar</span>
+            </button>
+            <button class="sidebar-link" data-workspace="settings" data-section="data-management" type="button" title="Datahantering">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7.5 10.5 12 15l4.5-4.5M4 18.5v2h16v-2"></path></svg>
+              <span>Datahantering</span>
+            </button>
+            <button class="sidebar-link" id="logout-button" type="button" title="Logga ut">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H5.5A1.5 1.5 0 0 0 4 5.5v13A1.5 1.5 0 0 0 5.5 20H10M14 8l4 4-4 4M18 12H9"></path></svg>
+              <span>Logga ut</span>
+            </button>
+          </div>
+          <div class="sidebar-status"><i></i><span>MOLNKONTO</span><button id="sidebar-collapse-bottom" type="button" aria-label="Fäll ihop sidopanelen">⇤</button></div>
+        </footer>
+      </aside>
+
+      <button id="drawer-scrim" class="drawer-scrim" type="button" aria-label="Stäng navigering" hidden></button>
+
+      <main class="main-workspace" id="main-workspace">
+        <header class="workspace-header">
+          <div class="workspace-title-group">
+            <button class="mobile-menu-button" id="mobile-menu" type="button" aria-label="Öppna navigering">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+            <div>
+              <p class="workspace-eyebrow" id="workspace-eyebrow">PERSONLIGT KUNSKAPSUNIVERSUM</p>
+              <h1 id="workspace-title">Universum</h1>
+            </div>
+          </div>
+          <div class="workspace-tools">
+            <label class="search-box" for="note-search">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 4.3 4.3"></path></svg>
+              <input id="note-search" type="search" placeholder="Sök anteckningar..." autocomplete="off" />
+              <kbd>Ctrl K</kbd>
+            </label>
+            <span class="workspace-count" id="workspace-note-count">0 PLANETER</span>
+            <button class="icon-button camera-reset" id="reset-camera" type="button" aria-label="Återställ kameran" title="Återställ kameran">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11a8 8 0 1 1 2.3 5.7M4 5v6h6"></path><circle cx="12" cy="12" r="2.5"></circle></svg>
+            </button>
+            <button class="button button-primary" id="new-note-button" type="button"><span class="plus-icon" aria-hidden="true">+</span><span>Ny planet</span></button>
+          </div>
+          <div id="search-results" class="search-results" hidden></div>
+        </header>
+
+        <div class="workspace-content">
+          <section id="solar-system" class="solar-system workspace-panel" aria-label="Interaktivt 3D-solsystem">
+            <div id="planet-labels" class="planet-labels"></div>
+            <div class="scene-vignette" aria-hidden="true"></div>
+            <div class="scene-topline">
+              <span class="live-indicator"><i></i> UNIVERSUM ONLINE</span>
+              <span class="note-count" id="note-count">0 PLANETER</span>
+            </div>
+            <div class="scene-hint"><span class="hint-mouse" aria-hidden="true">↗</span><span>Dra för att rotera <b>·</b> scrolla för att zooma</span></div>
+            <div id="scene-error" class="scene-error" role="alert" hidden></div>
+          </section>
+
+          <section class="calendar-view workspace-panel" id="calendar-view" aria-label="Astronomisk kalender" hidden>
+            <header class="calendar-header">
+              <div><p class="calendar-kicker">DIN ASTRONOMISKA KALENDER</p><h2 id="calendar-month"></h2></div>
+              <div class="calendar-navigation">
+                <button class="calendar-nav-button" id="calendar-previous" type="button" aria-label="Föregående månad">‹</button>
+                <button class="calendar-today-button" id="calendar-today" type="button">Idag</button>
+                <button class="calendar-nav-button" id="calendar-next" type="button" aria-label="Nästa månad">›</button>
+              </div>
+            </header>
+            <div class="calendar-layout">
+              <div class="calendar-board">
+                <div class="calendar-weekdays" aria-hidden="true"><span title="Måndag">MÅN</span><span title="Tisdag">TIS</span><span title="Onsdag">ONS</span><span title="Torsdag">TOR</span><span title="Fredag">FRE</span><span title="Lördag">LÖR</span><span title="Söndag">SÖN</span></div>
+                <div class="calendar-days" id="calendar-days"></div>
+              </div>
+              <aside class="calendar-sidebar" aria-label="Händelser, uppgifter och anteckningar">
+                <p class="calendar-sidebar-kicker">VALD DAG</p><h3 id="calendar-selected-date"></h3>
+                <section class="calendar-day-section"><h4>HÄNDELSER</h4><div class="calendar-events" id="calendar-events"></div></section>
+                <section class="calendar-day-section"><h4>UPPGIFTER</h4><div class="calendar-day-tasks" id="calendar-day-tasks"></div></section>
+                <section class="calendar-day-section"><h4>ANTECKNINGAR</h4><div class="calendar-day-notes" id="calendar-day-notes"></div></section>
+                <form class="calendar-event-form" id="calendar-event-form">
+                  <label class="field-label" for="calendar-event-title">Ny händelse</label>
+                  <input class="form-input" id="calendar-event-title" maxlength="100" placeholder="Lägg till en påminnelse" required />
+                  <button class="button button-primary calendar-add-button" type="submit">Lägg till händelse</button>
+                </form>
+                <p class="calendar-error" id="calendar-error" role="alert" hidden></p>
+              </aside>
+            </div>
+          </section>
+
+          <section class="content-workspace workspace-panel" id="tasks-view" hidden>
+            <div class="content-heading"><div><p class="calendar-kicker">DINA NÄSTA STEG</p><h2>Uppgifter</h2><p>Små steg håller kunskapen i rörelse.</p></div></div>
+            <form class="task-create-form" id="task-form">
+              <input class="form-input" id="task-title" maxlength="120" placeholder="Vad behöver göras?" required />
+              <input class="form-input task-date-input" id="task-due-date" type="date" aria-label="Förfallodatum" />
+              <button class="button button-primary" type="submit"><span class="plus-icon" aria-hidden="true">+</span> Lägg till uppgift</button>
+            </form>
+            <div class="task-list" id="task-list"></div>
+          </section>
+
+          <section class="content-workspace workspace-panel" id="projects-view" hidden>
+            <div class="content-heading"><div><p class="calendar-kicker">SAMLINGAR I DITT UNIVERSUM</p><h2>Projekt</h2><p>Anteckningar i kategorin Projects visas här.</p></div></div>
+            <div class="note-collection" id="projects-list"></div>
+          </section>
+
+          <section class="content-workspace workspace-panel" id="library-view" hidden>
+            <div class="content-heading"><div><p class="calendar-kicker">DITT PERSONLIGA ARKIV</p><h2 id="library-heading">Alla anteckningar</h2><p id="library-subtitle"></p></div></div>
+            <div class="note-collection" id="library-list"></div>
+          </section>
+
+          <section class="content-workspace workspace-panel" id="statistics-view" hidden>
+            <div class="content-heading"><div><p class="calendar-kicker">KUNSKAP I SIFFROR</p><h2>Statistik</h2><p>En överblick över hur ditt universum växer.</p></div></div>
+            <div class="statistics-grid" id="statistics-grid"></div>
+            <section class="statistics-breakdown"><h3>KATEGORIER</h3><div id="statistics-categories"></div></section>
+          </section>
+
+          <section class="content-workspace workspace-panel" id="settings-view" hidden>
+            <div class="content-heading"><div><p class="calendar-kicker">ANPASSA DITT UNIVERSUM</p><h2>Inställningar</h2><p>Visning och data hanteras lokalt i den här webbläsaren.</p></div></div>
+            <section class="settings-section">
+              <h3>RENDERINGSKVALITET</h3><p>Anpassa detaljnivå och prestanda för den här enheten.</p>
+              <label class="field-label" for="quality-setting">Grafikkvalitet</label>
+              <select class="form-input form-select" id="quality-setting"><option value="auto">Automatisk</option><option value="low">Låg</option><option value="medium">Medel</option><option value="high">Hög</option><option value="ultra">Ultra</option></select>
+            </section>
+            <section class="settings-section" id="data-management">
+              <h3>DATAHANTERING</h3><p>Exportera eller importera anteckningar som JSON. En export innehåller även kategorier, uppgifter och kalenderhändelser.</p>
+              <div class="settings-actions"><button class="button button-secondary" id="export-notes" type="button">Exportera data</button><button class="button button-secondary" id="import-notes-button" type="button">Importera JSON</button><input id="import-notes-file" type="file" accept=".json,application/json" hidden /></div>
+            </section>
+          </section>
+        </div>
+
+        <aside class="detail-panel" id="detail-panel" aria-label="Anteckningsdetaljer" hidden>
+          <div class="panel-top"><span class="panel-kicker"><i></i> PLANETDATA</span><button class="icon-button" id="close-details" type="button" aria-label="Stäng anteckning">×</button></div>
+          <div class="detail-orb" id="detail-orb" aria-hidden="true"><span></span></div>
+          <div class="detail-heading"><span class="category-pill" id="detail-category"></span><h2 id="detail-title"></h2></div>
+          <div class="detail-divider"></div><p class="detail-label">ANTECKNING</p><p class="detail-content" id="detail-content"></p>
+          <div class="detail-tags" id="detail-tags" hidden></div>
+          <div class="detail-meta"><span class="meta-label">VIKTIGHET</span><span class="importance-value" id="detail-importance"></span></div>
+          <div class="detail-actions"><button class="detail-action" id="toggle-favorite" type="button">☆ Favorit</button><button class="detail-action" id="toggle-archive" type="button">Arkivera</button></div>
+          <div class="detail-footer"><span class="footer-star" aria-hidden="true">✦</span><span>EN DEL AV DITT UNIVERSUM</span></div>
+        </aside>
+      </main>
+
+      <div class="modal-backdrop" id="note-modal" hidden>
+        <section class="note-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+          <div class="dialog-top"><div><p class="eyebrow">UTÖKA DITT UNIVERSUM</p><h2 id="modal-title">Skapa en planet</h2></div><button class="icon-button" id="close-modal" type="button" aria-label="Stäng formuläret">×</button></div>
+          <form id="note-form">
+            <label class="field-label" for="note-title">Titel</label><input class="form-input" id="note-title" name="title" maxlength="80" placeholder="T.ex. Kvantfysik" required />
+            <label class="field-label" for="note-category">Kategori</label><input class="form-input" id="note-category" name="category" maxlength="40" placeholder="T.ex. Vetenskap" required />
+            <label class="field-label" for="note-content">Innehåll</label><textarea class="form-input form-textarea" id="note-content" name="content" maxlength="5000" placeholder="Skriv ner det du vill komma ihåg..." required></textarea>
+            <label class="field-label" for="note-tags">Taggar <span class="optional-label">VALFRITT</span></label><input class="form-input" id="note-tags" name="tags" maxlength="160" placeholder="idé, projekt, senare" />
+            <label class="field-label" for="note-importance">Viktighet</label><select class="form-input form-select" id="note-importance" name="importance"><option value="1">Mindre planet</option><option value="2" selected>Normal</option><option value="3">Viktig planet</option></select>
+            <p class="form-note">Anteckningen sparas automatiskt i det här universumet.</p><div class="form-error" id="form-error" role="alert" hidden></div>
+            <button class="button button-primary submit-button" type="submit"><span class="plus-icon" aria-hidden="true">+</span> Skapa planet</button>
+          </form>
+        </section>
+      </div>
+
+      <div class="modal-backdrop" id="category-modal" hidden>
+        <section class="note-dialog category-dialog" role="dialog" aria-modal="true" aria-labelledby="category-modal-title">
+          <div class="dialog-top"><div><p class="eyebrow">ORGANISERA KUNSKAP</p><h2 id="category-modal-title">Ny kategori</h2></div><button class="icon-button" id="close-category-modal" type="button" aria-label="Stäng">×</button></div>
+          <form id="category-form"><label class="field-label" for="category-name">Kategorinamn</label><input class="form-input" id="category-name" maxlength="40" required placeholder="T.ex. Matematik" /><div class="form-error" id="category-error" role="alert" hidden></div><button class="button button-primary submit-button" type="submit">Skapa kategori</button></form>
+        </section>
+      </div>
+
+      <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    </div>
+    <div class="auth-screen" id="auth-screen" hidden>
+      <section class="auth-card" aria-labelledby="auth-title">
+        <div class="auth-brand">
+          <span class="brand-mark" aria-hidden="true"><span></span></span>
+          <span class="brand-copy"><strong>solar<span>notes</span></strong><small>PERSONAL KNOWLEDGE SYSTEM</small></span>
+        </div>
+        <p class="auth-eyebrow">PRIVAT MOLNUNIVERSUM</p>
+        <h1 id="auth-title">Logga in</h1>
+        <p class="auth-description" id="auth-description">Logga in för att öppna och synka dina anteckningar på dina enheter.</p>
+        <form id="auth-form">
+          <label class="field-label" for="auth-email">E-post</label>
+          <input class="form-input" id="auth-email" type="email" autocomplete="username" maxlength="254" required />
+          <label class="field-label" for="auth-password">Lösenord</label>
+          <input class="form-input" id="auth-password" type="password" autocomplete="current-password" maxlength="128" required />
+          <p class="auth-error" id="auth-error" role="alert" hidden></p>
+          <button class="button button-primary auth-submit" id="auth-submit" type="submit">Logga in</button>
+        </form>
+        <p class="auth-footnote">Privat inloggning. Dina data synkas säkert mellan dina enheter.</p>
+      </section>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

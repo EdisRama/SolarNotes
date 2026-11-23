@@ -1,0 +1,57 @@
+[
+  {
+    "id": "javascript",
+    "title": "JavaScript",
+    "category": "Programming",
+    "content": "Variabler, funktioner och objekt. Ett flexibelt språk som driver interaktiva upplevelser på webben.",
+    "tags": ["kod", "webb"],
+    "relatedIds": [],
+    "moons": [],
+    "systemId": "personal",
+    "source": "manual"
+  },
+  {
+    "id": "historia",
+    "title": "Historia",
+    "category": "School",
+    "content": "Andra världskriget. En samling tankar, händelser och viktiga årtal att återvända till.",
+    "tags": ["skola"],
+    "relatedIds": [],
+    "moons": [],
+    "systemId": "personal",
+    "source": "manual"
+  },
+  {
+    "id": "designsystem",
+    "title": "Designsystem",
+    "category": "Design",
+    "content": "Färger, typografi och komponenter som tillsammans skapar en tydlig och sammanhängande produkt.",
+    "tags": ["ux", "gränssnitt"],
+    "relatedIds": ["fargteori"],
+    "moons": [],
+    "systemId": "personal",
+    "source": "manual"
+  },
+  {
+    "id": "fargteori",
+    "title": "Färgteori",
+    "category": "Design",
+    "content": "Färg påverkar både känsla och läsbarhet. Kontrast och harmoni hjälper innehåll att hitta sin plats.",
+    "tags": ["design"],
+    "relatedIds": ["designsystem"],
+    "moons": [],
+    "systemId": "personal",
+    "source": "manual"
+  },
+  {
+    "id": "stjarnor",
+    "title": "Stjärnornas liv",
+    "category": "Science",
+    "content": "Stjärnor föds i nebulosor, lyser under miljarder år och lämnar efter sig nya byggstenar för universum.",
+    "tags": ["astronomi"],
+    "relatedIds": [],
+    "moons": [],
+    "systemId": "personal",
+    "source": "manual"
+  }
+]
