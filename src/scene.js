@@ -9,12 +9,6 @@ function createRandom(seed) {
   };
 }
 
-function resetCamera() {
-  focusTarget = null;
-  focusCamera = null;
-  controls.reset();
-}
-
 function createStarSpriteTexture() {
   const canvas = document.createElement("canvas");
   canvas.width = 64;
@@ -357,6 +351,10 @@ export function createSolarScene(container, initialQuality = "auto") {
   controls.maxDistance = 75;
   controls.maxPolarAngle = Math.PI * 0.82;
   controls.target.set(0, 0, 0);
+  controls.autoRotateSpeed = 0.45;
+  controls.addEventListener("start", () => {
+    controls.autoRotate = false;
+  });
 
   const ambient = new THREE.AmbientLight("#a8a8a8", 0.27);
   scene.add(ambient);
@@ -416,7 +414,15 @@ export function createSolarScene(container, initialQuality = "auto") {
   let focusTarget = null;
   let focusCamera = null;
 
+  function resetCamera() {
+    focusTarget = null;
+    focusCamera = null;
+    controls.reset();
+    controls.autoRotate = true;
+  }
+
   function focus(position, distance = 9) {
+    controls.autoRotate = false;
     const direction = camera.position.clone().sub(controls.target).normalize();
     if (direction.lengthSq() === 0) direction.set(0, 0.35, 1);
     focusTarget = position.clone();
