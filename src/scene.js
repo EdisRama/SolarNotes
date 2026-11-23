@@ -344,7 +344,7 @@ export function createSolarScene(container, initialQuality = "auto") {
   renderer.domElement.setAttribute("aria-label", "3D-solsystem. Klicka på en planet för att öppna anteckningen.");
   container.prepend(renderer.domElement);
 
-  const controls = new OrbitControls(camera, container);
+  const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.dampingFactor = 0.055;
   controls.minDistance = 7;
@@ -361,6 +361,21 @@ export function createSolarScene(container, initialQuality = "auto") {
   });
   const neutralCameraPosition = camera.position.clone();
   const neutralTarget = controls.target.clone();
+
+  function forwardLabelWheel(event) {
+    if (!(event.target instanceof Element) || !event.target.closest(".planet-label")) return;
+    event.preventDefault();
+    renderer.domElement.dispatchEvent(new WheelEvent("wheel", {
+      deltaX: event.deltaX,
+      deltaY: event.deltaY,
+      deltaZ: event.deltaZ,
+      deltaMode: event.deltaMode,
+      clientX: event.clientX,
+      clientY: event.clientY,
+      cancelable: true
+    }));
+  }
+  container.addEventListener("wheel", forwardLabelWheel, { passive: false });
 
   const ambient = new THREE.AmbientLight("#a8a8a8", 0.27);
   scene.add(ambient);
@@ -480,6 +495,7 @@ export function createSolarScene(container, initialQuality = "auto") {
     dispose() {
       if (resizeObserver) resizeObserver.disconnect();
       else window.removeEventListener("resize", resize);
+      container.removeEventListener("wheel", forwardLabelWheel);
       controls.dispose();
       const geometries = new Set();
       const materials = new Set();
