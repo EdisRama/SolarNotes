@@ -440,6 +440,9 @@ button.calendar-cell:hover { z-index: 1; border-color: rgba(133, 161, 222, 0.38)
 .note-card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
 .note-card-category { color: var(--category-color, #91a2c2); font: 8px var(--mono); letter-spacing: 0.65px; text-transform: uppercase; }
 .note-card h3 { margin: 0 0 7px; color: #e5eaf7; font: 500 15px var(--display); }
+.note-card-title-button { display: block; width: 100%; margin: 0 0 7px; padding: 0; appearance: none; border: 0; color: #e5e5e5; background: transparent; cursor: pointer; text-align: left; font: 500 15px/1.35 var(--display); overflow-wrap: anywhere; }
+.note-card-title-button:hover { color: #fff; }
+.note-card-title-button:focus-visible { border-radius: 2px; outline: 2px solid #bdbdbd; outline-offset: 3px; }
 .note-card p { display: -webkit-box; margin: 0; overflow: hidden; color: #919bae; font-size: 11px; line-height: 1.6; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
 .note-card-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
 .note-card-actions { display: flex; justify-content: flex-end; gap: 6px; margin-top: 12px; }
