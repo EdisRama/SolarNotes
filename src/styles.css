@@ -219,6 +219,20 @@ button { color: inherit; }
 .form-note { margin: 10px 0 0; color: #777990; font-size: 10px; }
 .form-error { margin-top: 13px; color: #ff9eae; font-size: 11px; line-height: 1.5; }
 .submit-button { width: 100%; margin-top: 20px; }
+.universe-dialog { width: min(560px, 100%); }
+.universe-dialog-description { margin: -10px 0 17px; color: #929292; font-size: 11px; line-height: 1.6; }
+.universe-list { display: grid; max-height: min(40vh, 300px); gap: 8px; overflow-y: auto; }
+.universe-choice { display: grid; grid-template-columns: minmax(0, 1fr) 118px; align-items: center; gap: 8px; padding: 9px; border: 1px solid rgba(255,255,255,.1); border-radius: 6px; background: rgba(255,255,255,.025); }
+.universe-choice.is-active { border-color: var(--universe-accent, #c8c8c8); background: rgba(255,255,255,.055); }
+.universe-choice-button { min-width: 0; padding: 2px 4px; border: 0; color: #eee; background: transparent; cursor: pointer; text-align: left; }
+.universe-route { display: grid; grid-template-columns: minmax(0, auto) minmax(14px, 1fr) auto; align-items: center; gap: 8px; }
+.universe-route-name { overflow: hidden; color: #eee; font-size: 12px; font-weight: 550; text-overflow: ellipsis; white-space: nowrap; }
+.universe-route-line { height: 1px; background: linear-gradient(90deg, rgba(255,255,255,.12), var(--universe-accent, #c8c8c8)); }
+.universe-route-arrow { color: var(--universe-accent, #c8c8c8); font-size: 16px; }
+.universe-choice-button small { display: block; margin-top: 5px; color: #888; font: 8px var(--mono); }
+.universe-choice .universe-theme-select { min-height: 33px; padding: 6px 7px; font-size: 10px; }
+.universe-create-form { margin-top: 18px; padding-top: 7px; border-top: 1px solid rgba(255,255,255,.1); }
+.universe-create-form .field-label:first-child { margin-top: 10px; }
 .toast { position: fixed; z-index: 15; right: 24px; bottom: 24px; max-width: min(390px, calc(100vw - 48px)); padding: 12px 16px; border: 1px solid rgba(149, 220, 180, 0.25); border-radius: 7px; color: #d7ffe6; background: rgba(17, 37, 30, 0.94); box-shadow: 0 10px 35px rgba(0, 0, 0, 0.33); opacity: 0; pointer-events: none; transform: translateY(8px); transition: opacity 180ms ease, transform 180ms ease; font-size: 12px; }
 .toast.is-visible { opacity: 1; transform: translateY(0); }
 .toast-error { border-color: rgba(255, 117, 138, 0.4); color: #ffdce3; background: rgba(46, 16, 27, 0.96); }
@@ -421,6 +435,12 @@ button.calendar-cell:hover { z-index: 1; border-color: rgba(133, 161, 222, 0.38)
 .workspace-count { color: #7e899e; white-space: nowrap; font: 8px var(--mono); letter-spacing: 0.9px; }
 .camera-reset { width: 32px; height: 32px; flex: 0 0 32px; }
 .camera-reset svg { width: 16px; height: 16px; }
+.universe-chooser-button { display: flex; min-width: 108px; max-width: 160px; align-items: center; gap: 8px; padding: 5px 9px; border: 1px solid rgba(255,255,255,.14); border-radius: 6px; color: #eee; background: rgba(255,255,255,.035); cursor: pointer; text-align: left; }
+.universe-chooser-button:hover { border-color: var(--universe-accent, #c8c8c8); background: rgba(255,255,255,.07); }
+.universe-chooser-arrow { color: var(--universe-accent, #c8c8c8); font-size: 19px; line-height: 1; }
+.universe-chooser-copy { display: grid; min-width: 0; gap: 2px; }
+.universe-chooser-copy small { color: #888; font: 7px var(--mono); letter-spacing: .7px; }
+.universe-chooser-copy strong { overflow: hidden; color: #eee; font-size: 10px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
 .mobile-menu-button { display: none; width: 32px; height: 32px; flex: 0 0 32px; place-items: center; border: 1px solid rgba(154, 168, 206, 0.15); border-radius: 5px; color: #9daac1; background: transparent; cursor: pointer; }
 .workspace-content { position: relative; min-height: 0; flex: 1; overflow: hidden; }
 .workspace-panel { width: 100%; height: 100%; }
@@ -517,6 +537,8 @@ button.calendar-cell:hover { z-index: 1; border-color: rgba(133, 161, 222, 0.38)
   .workspace-title-group h1 { font-size: 16px; }
   .workspace-tools .search-box { width: min(190px, 30vw); }
   .workspace-tools .search-box kbd, .camera-reset { display: none; }
+  .universe-chooser-button { min-width: 33px; width: 33px; height: 33px; justify-content: center; padding: 0; }
+  .universe-chooser-copy { display: none; }
   .workspace-tools .button { padding: 0 9px; font-size: 10px; }
   .detail-panel { top: auto; bottom: 0; width: 100%; height: min(62%, 470px); padding: 14px 20px; border-top: 1px solid rgba(180, 177, 229, 0.15); border-left: 0; }
   .content-workspace { padding: 24px 17px; }
@@ -536,6 +558,8 @@ button.calendar-cell:hover { z-index: 1; border-color: rgba(133, 161, 222, 0.38)
   .workspace-tools .search-box { width: 34vw; min-width: 105px; height: 34px; padding: 0 7px; }
   .workspace-tools .search-box svg { width: 14px; flex-basis: 14px; }
   .workspace-tools .search-box input { font-size: 10px; }
+  .universe-choice { grid-template-columns: minmax(0, 1fr) 95px; gap: 5px; padding: 7px; }
+  .universe-choice .universe-theme-select { padding-right: 4px; padding-left: 5px; font-size: 9px; }
   .workspace-tools .button { min-height: 34px; gap: 4px; padding: 0 7px; }
   .workspace-tools .plus-icon { font-size: 17px; }
   .task-create-form { grid-template-columns: minmax(0, 1fr) 105px; }
@@ -686,3 +710,67 @@ body, .app-shell, .main-workspace, .solar-system, .calendar-view, .content-works
   .planet-editor { min-height: 100px; }
   .folder-move-select { width: 62px; }
 }
+
+.app-shell[data-universe-theme="neon"] {
+  --universe-accent: #b8ff00;
+  --universe-secondary: #ff41b6;
+}
+.app-shell[data-universe-theme="neon"] .button-primary {
+  border-color: rgba(184,255,0,.8);
+  color: #080b04;
+  background: linear-gradient(120deg, #39ff14, #fff000);
+  box-shadow: 0 0 22px rgba(57,255,20,.18), inset 0 1px rgba(255,255,255,.55);
+}
+.app-shell[data-universe-theme="neon"] .button-primary:hover,
+.app-shell[data-universe-theme="neon"] .sidebar-link.is-active {
+  border-color: #fff000;
+  background: linear-gradient(120deg, rgba(57,255,20,.28), rgba(255,240,0,.16));
+  box-shadow: inset 3px 0 #39ff14, 0 0 16px rgba(57,255,20,.1);
+}
+.app-shell[data-universe-theme="neon"] .sidebar-link.is-active::before,
+.app-shell[data-universe-theme="neon"] .live-indicator i {
+  background: #39ff14;
+  box-shadow: 0 0 10px #39ff14;
+}
+.app-shell[data-universe-theme="neon"] .note-card-course-link,
+.app-shell[data-universe-theme="neon"] .course-link,
+.app-shell[data-universe-theme="neon"] .universe-chooser-button {
+  border-color: rgba(184,255,0,.65);
+  color: #d6ff4f;
+  box-shadow: 0 0 12px rgba(57,255,20,.12);
+}
+.app-shell[data-universe-theme="neon"] .note-card-course-link:hover,
+.app-shell[data-universe-theme="neon"] .course-link:hover {
+  color: #fff000;
+}
+.app-shell[data-universe-theme="neon"] .note-card,
+.app-shell[data-universe-theme="neon"] .universe-choice.is-active {
+  border-color: rgba(57,255,20,.32);
+  box-shadow: 0 0 18px rgba(57,255,20,.08);
+}
+.app-shell[data-universe-theme="neon"] .calendar-event-indicator.has-events {
+  background: #39ff14;
+  box-shadow: 0 0 12px rgba(57,255,20,.72);
+}
+.app-shell[data-universe-theme="neon"] .detail-footer .footer-star {
+  color: #ff41b6;
+  text-shadow: 0 0 12px rgba(255,65,182,.76);
+}
+.app-shell[data-universe-theme="neon"] .calendar-cell.is-marked,
+.app-shell[data-universe-theme="neon"] .calendar-cell.is-today:not(.is-selected) {
+  border-color: rgba(184,255,0,.62);
+}
+.app-shell[data-universe-theme="neon"] .planet-label:hover,
+.app-shell[data-universe-theme="neon"] .detail-action:hover,
+.app-shell[data-universe-theme="neon"] .calendar-cell.is-selected {
+  border-color: #b8ff00;
+  box-shadow: 0 0 16px rgba(57,255,20,.22);
+}
+.app-shell[data-universe-theme="neon"] .workspace-eyebrow,
+.app-shell[data-universe-theme="neon"] .category-pill,
+.app-shell[data-universe-theme="neon"] .folder-star,
+.app-shell[data-universe-theme="neon"] .universe-chooser-arrow {
+  color: #b8ff00;
+}
+.app-shell[data-universe-theme="neon"] .note-card-category { color: #fff000; }
+.app-shell[data-universe-theme="neon"] .note-card-course-link { background: rgba(57,255,20,.07); }

@@ -115,6 +115,10 @@
             </div>
           </div>
           <div class="workspace-tools">
+            <button class="universe-chooser-button" id="universe-chooser-button" type="button" aria-haspopup="dialog" aria-label="Zooma ut och välj universum">
+              <span class="universe-chooser-arrow" aria-hidden="true">↗</span>
+              <span class="universe-chooser-copy"><small>AKTIV GALAX</small><strong id="active-universe-name">Mitt universum</strong></span>
+            </button>
             <label class="search-box" for="note-search">
               <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 4.3 4.3"></path></svg>
               <input id="note-search" type="search" placeholder="Sök anteckningar..." autocomplete="off" />
@@ -252,6 +256,27 @@
         <section class="note-dialog category-dialog" role="dialog" aria-modal="true" aria-labelledby="category-modal-title">
           <div class="dialog-top"><div><p class="eyebrow">ORGANISERA KUNSKAP</p><h2 id="category-modal-title">Ny kategori</h2></div><button class="icon-button" id="close-category-modal" type="button" aria-label="Stäng">×</button></div>
           <form id="category-form"><label class="field-label" for="category-name">Kategorinamn</label><input class="form-input" id="category-name" maxlength="40" required placeholder="T.ex. Matematik" /><div class="form-error" id="category-error" role="alert" hidden></div><button class="button button-primary submit-button" type="submit">Skapa kategori</button></form>
+        </section>
+      </div>
+
+      <div id="universe-modal" class="modal-backdrop" hidden>
+        <section class="note-dialog universe-dialog" role="dialog" aria-modal="true" aria-labelledby="universe-modal-title">
+          <div class="dialog-top">
+            <div><p class="eyebrow">VÄLJ DIN GALAX</p><h2 id="universe-modal-title">Universum</h2></div>
+            <button class="icon-button" id="close-universe-modal" type="button" aria-label="Stäng">×</button>
+          </div>
+          <p class="universe-dialog-description">Varje universum har sina egna planeter, kurser, mappar, uppgifter, kalenderhändelser och tema.</p>
+          <div class="universe-list" id="universe-list"></div>
+          <form id="universe-form" class="universe-create-form">
+            <label class="field-label" for="universe-name">Skapa nytt universum</label>
+            <input class="form-input" id="universe-name" maxlength="40" required placeholder="T.ex. Skolan, Projekt eller Privat" />
+            <label class="field-label" for="universe-theme">Galaxens tema</label>
+            <select class="form-input form-select" id="universe-theme">
+              <option value="graphite">Grafit</option><option value="lunar">Månsken</option><option value="ash">Aska</option><option value="neon">Neon</option>
+            </select>
+            <div class="form-error" id="universe-error" role="alert" hidden></div>
+            <button class="button button-primary submit-button" type="submit">+ Skapa universum</button>
+          </form>
         </section>
       </div>
 

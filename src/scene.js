@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { DEFAULT_UNIVERSE_THEME, UNIVERSE_THEMES } from "./universe-themes.js";
 
 function createRandom(seed) {
   let state = seed || 1;
@@ -320,7 +321,7 @@ function createSun(scene) {
   return { sun, core };
 }
 
-export function createSolarScene(container, initialQuality = "auto") {
+export function createSolarScene(container, initialQuality = "auto", initialTheme = DEFAULT_UNIVERSE_THEME) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color("#050505");
   scene.fog = new THREE.FogExp2("#050505", 0.0022);
@@ -348,7 +349,7 @@ export function createSolarScene(container, initialQuality = "auto") {
   controls.enableDamping = true;
   controls.dampingFactor = 0.055;
   controls.minDistance = 7;
-  controls.maxDistance = 75;
+  controls.maxDistance = 160;
   controls.maxPolarAngle = Math.PI * 0.82;
   controls.target.set(0, 0, 0);
   let focusTarget = null;
@@ -382,6 +383,17 @@ export function createSolarScene(container, initialQuality = "auto") {
   const { sun, core } = createSun(scene);
   const starLayers = createStarfield(scene, lowPower);
   const nebulae = createNebulae(scene, lowPower);
+
+  function setTheme(themeId) {
+    const theme = UNIVERSE_THEMES[themeId];
+    if (!theme) throw new TypeError("Universumets tema kunde inte hittas.");
+    scene.background.set(theme.background);
+    scene.fog.color.set(theme.background);
+    starLayers.forEach((stars) => stars.material.color.set(theme.stars));
+    nebulae.forEach((nebula, index) => {
+      nebula.material.color.set(theme.nebulaColors[index % theme.nebulaColors.length] || theme.nebula);
+    });
+  }
 
   let resizeObserver;
   if (typeof ResizeObserver !== "undefined") {
@@ -430,6 +442,7 @@ export function createSolarScene(container, initialQuality = "auto") {
     stars.userData.qualityOpacity = stars.material.opacity;
   });
   setQuality(initialQuality);
+  setTheme(initialTheme);
   resize();
 
   function resetCamera() {
@@ -444,6 +457,14 @@ export function createSolarScene(container, initialQuality = "auto") {
     if (direction.lengthSq() === 0) direction.set(0, 0.35, 1);
     focusTarget = position.clone();
     focusCamera = position.clone().add(direction.multiplyScalar(distance));
+  }
+
+  function zoomOut() {
+    const direction = camera.position.clone().sub(controls.target).normalize();
+    if (direction.lengthSq() === 0) direction.set(0, 0.35, 1);
+    focusTarget = neutralTarget.clone();
+    focusCamera = neutralTarget.clone().add(direction.multiplyScalar(125));
+    resettingCamera = false;
   }
 
   function updateFocus(delta) {
@@ -487,7 +508,9 @@ export function createSolarScene(container, initialQuality = "auto") {
     sun,
     sunCore: core,
     focus,
+    zoomOut,
     resetCamera,
+    setTheme,
     setQuality,
     updateFocus,
     updateAmbient,

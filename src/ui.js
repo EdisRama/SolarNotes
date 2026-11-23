@@ -1,3 +1,5 @@
+import { UNIVERSE_THEMES } from "./universe-themes.js";
+
 const WORKSPACE_COPY = {
   universe: ["PERSONLIGT KUNSKAPSUNIVERSUM", "Universum"],
   calendar: ["PLANERA I DITT UNIVERSUM", "Kalender"],
@@ -12,6 +14,10 @@ export function createUI({
   onSearch,
   onSelect,
   onCreate,
+  onOpenUniverses,
+  onSelectUniverse,
+  onCreateUniverse,
+  onUpdateUniverse,
   onClose,
   onNavigate,
   onToggleNote,
@@ -42,11 +48,25 @@ export function createUI({
   const categoryModal = document.querySelector("#category-modal");
   const categoryForm = document.querySelector("#category-form");
   const categoryError = document.querySelector("#category-error");
+  const universeModal = document.querySelector("#universe-modal");
+  const universeForm = document.querySelector("#universe-form");
+  const universeError = document.querySelector("#universe-error");
+  const universeList = document.querySelector("#universe-list");
   const toast = document.querySelector("#toast");
   const titleInput = document.querySelector("#note-title");
   const categoryList = document.querySelector("#category-list");
   const fileInput = document.querySelector("#import-notes-file");
-  const state = { workspace: "universe", filter: "all", category: null, notes: [], categories: [], tasks: [], folders: [] };
+  const state = {
+    workspace: "universe",
+    filter: "all",
+    category: null,
+    notes: [],
+    categories: [],
+    tasks: [],
+    folders: [],
+    universes: [],
+    activeUniverseId: ""
+  };
   let toastTimer;
   let editorSaveTimer;
   let modalOpener;
@@ -68,6 +88,76 @@ export function createUI({
   function setDrawerOpen(open) {
     appShell.classList.toggle("is-drawer-open", open);
     document.querySelector("#drawer-scrim").hidden = !open;
+  }
+
+  function renderUniverseList() {
+    universeList.replaceChildren();
+    const activeUniverse = state.universes.find((universe) => universe.id === state.activeUniverseId);
+    document.querySelector("#active-universe-name").textContent = activeUniverse?.name || "Universum";
+
+    for (const universe of state.universes) {
+      const item = document.createElement("article");
+      item.className = `universe-choice${universe.id === state.activeUniverseId ? " is-active" : ""}`;
+      const choose = document.createElement("button");
+      choose.type = "button";
+      choose.className = "universe-choice-button";
+      choose.setAttribute("aria-current", universe.id === state.activeUniverseId ? "true" : "false");
+
+      const routeName = document.createElement("strong");
+      routeName.className = "universe-route-name";
+      routeName.textContent = universe.name;
+      const routeLine = document.createElement("span");
+      routeLine.className = "universe-route-line";
+      routeLine.setAttribute("aria-hidden", "true");
+      const routeArrow = document.createElement("span");
+      routeArrow.className = "universe-route-arrow";
+      routeArrow.textContent = "↗";
+      routeArrow.setAttribute("aria-hidden", "true");
+      const route = document.createElement("span");
+      route.className = "universe-route";
+      route.append(routeName, routeLine, routeArrow);
+
+      const description = document.createElement("small");
+      const universeNotes = universe.id === state.activeUniverseId
+        ? state.notes
+        : universe.data?.notes || [];
+      const planetCount = universeNotes.filter((note) => !note.archived && !note.folderId).length;
+      const themeName = UNIVERSE_THEMES[universe.theme]?.label || UNIVERSE_THEMES.graphite.label;
+      description.textContent = `${planetCount} ${planetCount === 1 ? "planet" : "planeter"} · ${themeName}`;
+      choose.append(route, description);
+      choose.addEventListener("click", () => {
+        try {
+          if (universe.id !== state.activeUniverseId) onSelectUniverse(universe.id);
+          else onNavigate("reset-camera");
+          closeModal(universeModal, universeForm);
+        } catch (error) {
+          universeError.textContent = error.message || "Kunde inte öppna universumet.";
+          universeError.hidden = false;
+        }
+      });
+
+      const themeSelect = document.createElement("select");
+      themeSelect.className = "form-input form-select universe-theme-select";
+      themeSelect.setAttribute("aria-label", `Tema för ${universe.name}`);
+      for (const [themeId, theme] of Object.entries(UNIVERSE_THEMES)) {
+        const option = document.createElement("option");
+        option.value = themeId;
+        option.textContent = theme.label;
+        themeSelect.append(option);
+      }
+      themeSelect.value = universe.theme;
+      themeSelect.addEventListener("change", () => {
+        try {
+          onUpdateUniverse(universe.id, { theme: themeSelect.value });
+        } catch (error) {
+          showMessage(error.message || "Kunde inte ändra universumets tema.", "error");
+          themeSelect.value = universe.theme;
+        }
+      });
+
+      item.append(choose, themeSelect);
+      universeList.append(item);
+    }
   }
 
   function setWorkspace(workspace, filter = "all", category = null, section = null) {
@@ -412,7 +502,14 @@ export function createUI({
     categoryList.classList.toggle("is-collapsed", !categoriesExpanded);
   }
 
-  function setData({ notes = state.notes, categories = state.categories, tasks = state.tasks, folders = state.folders }) {
+  function setData({
+    notes = state.notes,
+    categories = state.categories,
+    tasks = state.tasks,
+    folders = state.folders,
+    universes = state.universes,
+    activeUniverseId = state.activeUniverseId
+  }) {
     state.categories = categories;
     state.notes = notes.map((note) => ({
       ...note,
@@ -423,6 +520,9 @@ export function createUI({
     }));
     state.tasks = tasks;
     state.folders = folders;
+    state.universes = universes;
+    state.activeUniverseId = activeUniverseId;
+    renderUniverseList();
     renderCategories(categories);
     renderData();
     if (activeNoteId) {
@@ -786,8 +886,39 @@ export function createUI({
     }
     openModal(modal, titleInput);
   });
+  document.querySelector("#universe-chooser-button").addEventListener("click", () => {
+    if (state.workspace !== "universe") setWorkspace("universe");
+    universeError.hidden = true;
+    renderUniverseList();
+    try {
+      if (!panel.hidden) closeDetails();
+      onOpenUniverses();
+      openModal(universeModal, document.querySelector("#universe-name"));
+    } catch (error) {
+      showMessage(error.message || "Kunde inte öppna universumväljaren.", "error");
+    }
+  });
   document.querySelector("#close-modal").addEventListener("click", () => closeModal(modal, form));
   document.querySelector("#close-details").addEventListener("click", closeDetails);
+  document.querySelector("#close-universe-modal").addEventListener("click", () => closeModal(universeModal, universeForm));
+  universeModal.addEventListener("click", (event) => {
+    if (event.target === universeModal) closeModal(universeModal, universeForm);
+  });
+  universeForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    universeError.hidden = true;
+    try {
+      onCreateUniverse({
+        name: document.querySelector("#universe-name").value,
+        theme: document.querySelector("#universe-theme").value
+      });
+      closeModal(universeModal, universeForm);
+      showMessage("Ett nytt personligt universum har skapats.");
+    } catch (error) {
+      universeError.textContent = error.message || "Kunde inte skapa universumet.";
+      universeError.hidden = false;
+    }
+  });
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     const tags = document.querySelector("#note-tags").value
@@ -976,6 +1107,7 @@ export function createUI({
     if (event.key === "Escape") {
       if (!modal.hidden) closeModal(modal, form);
       else if (!categoryModal.hidden) closeModal(categoryModal, categoryForm);
+      else if (!universeModal.hidden) closeModal(universeModal, universeForm);
       else if (appShell.classList.contains("is-drawer-open")) setDrawerOpen(false);
       else if (state.workspace === "universe") {
         if (!panel.hidden) closeDetails();
@@ -983,7 +1115,13 @@ export function createUI({
       }
       return;
     }
-    const activeModal = !modal.hidden ? modal : !categoryModal.hidden ? categoryModal : null;
+    const activeModal = !modal.hidden
+      ? modal
+      : !categoryModal.hidden
+        ? categoryModal
+        : !universeModal.hidden
+          ? universeModal
+          : null;
     if (activeModal && event.key === "Tab") {
       const focusable = activeModal.querySelectorAll(
         'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled])'

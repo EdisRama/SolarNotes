@@ -26,7 +26,15 @@ import {
   saveCloudData,
   showAuthErrorMessage
 } from "./auth.js";
-import { configurePersistence, hydrateLocalData, readLocalData } from "./persistence.js";
+import {
+  configurePersistence,
+  createUniverse,
+  hydrateLocalData,
+  loadUniverseState,
+  readLocalData,
+  switchUniverse,
+  updateUniverse
+} from "./persistence.js";
 import {
   createFolder,
   deleteFolder,
@@ -34,6 +42,7 @@ import {
   persistFolders,
   updateFolder
 } from "./folders.js";
+import { DEFAULT_UNIVERSE_THEME, UNIVERSE_THEMES } from "./universe-themes.js";
 import "./styles.css";
 
 const container = document.querySelector("#solar-system");
@@ -43,6 +52,8 @@ let notes = [];
 let categories = [];
 let tasks = [];
 let folders = [];
+let universes = [];
+let activeUniverseId = "";
 let solarScene;
 let planetSystem;
 let calendar;
@@ -58,13 +69,18 @@ function showNoteById(id) {
     planetSystem.setSelected(id);
     planetSystem.focusPlanet(id, solarScene);
   }
-  ui.showNote(note, entry ? entry.color : colorForCategory(note.category));
+  const activeUniverse = universes.find((universe) => universe.id === activeUniverseId);
+  ui.showNote(
+    note,
+    entry ? entry.color : colorForCategory(note.category, activeUniverse?.theme || DEFAULT_UNIVERSE_THEME)
+  );
 }
 
 function updateCategoryColors() {
+  const activeUniverse = universes.find((universe) => universe.id === activeUniverseId);
   categories = categories.map((category) => ({
     ...category,
-    color: colorForCategory(category.name)
+    color: colorForCategory(category.name, activeUniverse?.theme || DEFAULT_UNIVERSE_THEME)
   }));
 }
 
@@ -102,9 +118,32 @@ function syncPlanetFilters() {
 
 function refreshData() {
   updateCategoryColors();
-  ui.setData({ notes, categories, tasks, folders });
+  ui.setData({ notes, categories, tasks, folders, universes, activeUniverseId });
   syncPlanetFilters();
   if (calendar) calendar.render();
+}
+
+function applyUniverseTheme() {
+  const activeUniverse = universes.find((universe) => universe.id === activeUniverseId);
+  const themeId = activeUniverse?.theme || DEFAULT_UNIVERSE_THEME;
+  const theme = UNIVERSE_THEMES[themeId];
+  document.querySelector("#app-shell").style.setProperty("--universe-accent", theme.accent);
+  document.querySelector("#app-shell").dataset.universeTheme = themeId;
+  if (solarScene) solarScene.setTheme(themeId);
+  if (planetSystem) planetSystem.setTheme(themeId);
+}
+
+function applyUniverseData(data) {
+  notes = data.notes;
+  categories = data.categories;
+  tasks = data.tasks;
+  folders = data.folders;
+  universes = data.universes;
+  activeUniverseId = data.activeUniverseId;
+  if (planetSystem) planetSystem.setNotes(notes);
+  if (calendar) calendar.setEvents(data.events);
+  applyUniverseTheme();
+  refreshData();
 }
 
 function exportData() {
@@ -159,6 +198,9 @@ async function start() {
     if (existingData) await saveCloudData(existingData);
   }
   configurePersistence((data) => saveCloudData(data));
+  const universeState = loadUniverseState();
+  universes = universeState.universes;
+  activeUniverseId = universeState.activeUniverseId;
   window.addEventListener("solar-notes:persistence-error", (event) => {
     if (ui) ui.showMessage(event.detail.message, "error");
   });
@@ -174,6 +216,30 @@ async function start() {
       );
     },
     onSelect: showNoteById,
+    onOpenUniverses() {
+      if (solarScene) solarScene.zoomOut();
+    },
+    onSelectUniverse(id) {
+      const data = switchUniverse(id);
+      ui.closeDetails();
+      applyUniverseData(data);
+      if (solarScene) solarScene.resetCamera();
+      const active = universes.find((universe) => universe.id === activeUniverseId);
+      ui.showMessage(`Bytte till ${active ? active.name : "universumet"}.`);
+    },
+    onCreateUniverse(input) {
+      const data = createUniverse(input.name, input.theme);
+      ui.closeDetails();
+      applyUniverseData(data);
+      if (solarScene) solarScene.resetCamera();
+    },
+    onUpdateUniverse(id, updates) {
+      const state = updateUniverse(id, updates);
+      universes = state.universes;
+      activeUniverseId = state.activeUniverseId;
+      applyUniverseTheme();
+      refreshData();
+    },
     onClose() {
       if (planetSystem) planetSystem.setSelected(null);
     },
@@ -418,14 +484,25 @@ async function start() {
   });
 
   try {
-    solarScene = createSolarScene(container, quality);
+    const activeUniverse = universes.find((universe) => universe.id === activeUniverseId);
+    solarScene = createSolarScene(
+      container,
+      quality,
+      activeUniverse?.theme || DEFAULT_UNIVERSE_THEME
+    );
+    applyUniverseTheme();
   } catch (error) {
     ui.showMessage("3D-grafik är inte tillgänglig. Kalendern och dina anteckningar fungerar fortfarande.", "error");
     ui.setView("calendar");
     console.error("WebGL kunde inte starta:", error);
     return;
   }
-  planetSystem = createPlanetSystem(solarScene.scene, labelLayer);
+  const activeUniverse = universes.find((universe) => universe.id === activeUniverseId);
+  planetSystem = createPlanetSystem(
+    solarScene.scene,
+    labelLayer,
+    activeUniverse?.theme || DEFAULT_UNIVERSE_THEME
+  );
   notes.forEach((note, index) => {
     if (!note.folderId) planetSystem.add(note, index);
   });

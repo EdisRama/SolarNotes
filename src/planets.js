@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { DEFAULT_UNIVERSE_THEME, UNIVERSE_THEMES } from "./universe-themes.js";
 
 const CATEGORY_COLORS = {
   javascript: "#d7d7d7",
@@ -27,13 +28,22 @@ function hashString(value) {
   return Math.abs(hash);
 }
 
-export function colorForCategory(category) {
+export function colorForCategory(category, themeId = DEFAULT_UNIVERSE_THEME) {
   const key = category.trim().toLowerCase();
+  const planetColors = UNIVERSE_THEMES[themeId]?.planetColors;
+  if (planetColors) return planetColors[hashString(key) % planetColors.length];
   return CATEGORY_COLORS[key] || FALLBACK_COLORS[hashString(key) % FALLBACK_COLORS.length];
 }
 
 function planetRadius(importance) {
   return PLANET_RADII[importance] || PLANET_RADII[2];
+}
+
+function colorForPlanet(note, themeId) {
+  const planetColors = UNIVERSE_THEMES[themeId]?.planetColors;
+  return planetColors
+    ? planetColors[hashString(note.id) % planetColors.length]
+    : colorForCategory(note.category, themeId);
 }
 
 function createPlanetTexture(color, seed, category) {
@@ -236,7 +246,7 @@ function getAtmosphereMaterial(color) {
   return material;
 }
 
-export function createPlanetSystem(scene, labelLayer) {
+export function createPlanetSystem(scene, labelLayer, initialTheme = DEFAULT_UNIVERSE_THEME) {
   const entries = new Map();
   const orbits = new Map();
   const raycaster = new THREE.Raycaster();
@@ -247,6 +257,7 @@ export function createPlanetSystem(scene, labelLayer) {
   let searchQuery = "";
   let categoryFilter = null;
   let noteFilter = null;
+  let themeId = initialTheme;
 
   function createOrbit(radius, color) {
     const points = [];
@@ -280,7 +291,7 @@ export function createPlanetSystem(scene, labelLayer) {
       const orbitRadius = INNER_ORBIT_RADIUS + orbitIndex * ORBIT_SPACING;
       let orbit = orbits.get(orbitIndex);
       if (!orbit) {
-        orbit = createOrbit(orbitRadius, "#777777");
+        orbit = createOrbit(orbitRadius, UNIVERSE_THEMES[themeId].orbit);
         orbits.set(orbitIndex, orbit);
       }
 
@@ -305,7 +316,7 @@ export function createPlanetSystem(scene, labelLayer) {
   function add(note, index = entries.size) {
     if (entries.has(note.id)) return entries.get(note.id);
 
-    const color = colorForCategory(note.category);
+    const color = colorForPlanet(note, themeId);
     const radius = planetRadius(note.importance);
     const categoryKey = note.category.toLowerCase();
     const isIce = categoryKey === "science";
@@ -369,7 +380,7 @@ export function createPlanetSystem(scene, labelLayer) {
     const entry = entries.get(note.id);
     if (!entry) return null;
 
-    const color = colorForCategory(note.category);
+    const color = colorForPlanet(note, themeId);
     const categoryKey = note.category.toLowerCase();
     const isIce = categoryKey === "science";
     const isGasGiant = ["programming", "school", "work"].includes(categoryKey);
@@ -415,7 +426,13 @@ export function createPlanetSystem(scene, labelLayer) {
     for (const entry of entries.values()) {
       updatePosition(entry);
       entry.mesh.rotation.y += delta * entry.rotationSpeed;
-      const targetGlow = entry.selected ? 0.82 : entry.hovered ? 0.5 : entry.matched ? 0.16 : 0.035;
+      const targetGlow = entry.selected
+        ? 0.92
+        : entry.hovered
+          ? themeId === "neon" ? 0.72 : 0.5
+          : entry.matched
+            ? themeId === "neon" ? 0.38 : 0.16
+            : themeId === "neon" ? 0.08 : 0.035;
       entry.mesh.material.emissiveIntensity +=
         (targetGlow - entry.mesh.material.emissiveIntensity) * Math.min(delta * 5, 1);
       const targetScale = entry.selected ? 1.13 : entry.hovered ? 1.07 : 1;
@@ -449,7 +466,9 @@ export function createPlanetSystem(scene, labelLayer) {
       entry.matched = isMatch;
       entry.mesh.material.transparent = !isMatch;
       entry.mesh.material.opacity = isMatch ? 1 : 0.22;
-      entry.mesh.material.emissiveIntensity = isMatch ? 0.2 : 0.035;
+      entry.mesh.material.emissiveIntensity = isMatch
+        ? themeId === "neon" ? 0.38 : 0.2
+        : themeId === "neon" ? 0.08 : 0.035;
       entry.label.classList.toggle("is-dimmed", !isMatch);
       if (isMatch) {
         matches.push(entry.note);
@@ -507,11 +526,25 @@ export function createPlanetSystem(scene, labelLayer) {
     for (const entry of entries.values()) entry.selected = entry.note.id === id;
   }
 
+  function setTheme(nextTheme) {
+    if (!Object.hasOwn(UNIVERSE_THEMES, nextTheme)) {
+      throw new TypeError("Universumets tema kunde inte hittas.");
+    }
+    if (themeId === nextTheme) return;
+    themeId = nextTheme;
+    for (const orbit of orbits.values()) {
+      orbit.material.color.set(UNIVERSE_THEMES[themeId].orbit);
+    }
+    for (const entry of entries.values()) updateNote(entry.note);
+  }
+
   function remove(id) {
     const entry = entries.get(id);
     if (!entry) return;
     scene.remove(entry.mesh);
     entry.label.remove();
+    entry.mesh.material?.map?.dispose();
+    entry.mesh.material?.bumpMap?.dispose();
     entry.mesh.material?.dispose();
     entries.delete(id);
     Array.from(entries.values())
@@ -523,14 +556,38 @@ export function createPlanetSystem(scene, labelLayer) {
     applyFilters();
   }
 
+  function setNotes(notes) {
+    hoveredId = null;
+    selectedId = null;
+    for (const entry of entries.values()) {
+      scene.remove(entry.mesh);
+      entry.label.remove();
+      entry.mesh.material?.map?.dispose();
+      entry.mesh.material?.bumpMap?.dispose();
+      entry.mesh.material?.dispose();
+    }
+    entries.clear();
+    for (const orbit of orbits.values()) {
+      scene.remove(orbit);
+      orbit.geometry.dispose();
+      orbit.material.dispose();
+    }
+    orbits.clear();
+    notes.forEach((note, index) => {
+      if (!note.folderId) add(note, index);
+    });
+  }
+
   return {
     add,
     remove,
+    setNotes,
     updateNote,
     update,
     setSearch,
     setCategoryFilter,
     setNoteFilter,
+    setTheme,
     intersect,
     focusPlanet,
     setHovered,
