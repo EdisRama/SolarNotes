@@ -390,6 +390,25 @@ export function createUI({
     }
   }
 
+  function renderCourseLink(value) {
+    const link = document.querySelector("#detail-course-link");
+    const raw = typeof value === "string" ? value.trim() : "";
+    if (!raw) {
+      link.hidden = true;
+      link.removeAttribute("href");
+      return;
+    }
+    try {
+      const url = new URL(raw);
+      if (!["http:", "https:"].includes(url.protocol)) throw new TypeError("Ogiltigt protokoll.");
+      link.href = url.href;
+      link.hidden = false;
+    } catch {
+      link.hidden = true;
+      link.removeAttribute("href");
+    }
+  }
+
   function renderPlanetFolders(planetId) {
     const list = document.querySelector("#planet-folder-list");
     list.replaceChildren();
@@ -626,6 +645,8 @@ export function createUI({
     const category = document.querySelector("#detail-category");
     category.textContent = note.category;
     category.style.setProperty("--category-color", color);
+    document.querySelector("#detail-course-url-input").value = note.courseUrl || "";
+    renderCourseLink(note.courseUrl);
     document.querySelector("#detail-title-input").value = note.title;
     document.querySelector("#detail-content-input").value = note.content;
     document.querySelector("#editor-save-status").textContent = "Allt sparat";
@@ -740,6 +761,7 @@ export function createUI({
     const input = {
       title: titleInput.value,
       category: document.querySelector("#note-category").value,
+      courseUrl: document.querySelector("#note-course-url").value,
       content: document.querySelector("#note-content").value,
       tags,
       importance: Number(document.querySelector("#note-importance").value),
@@ -748,7 +770,7 @@ export function createUI({
     try {
       onCreate(input);
       closeModal(modal, form);
-      showMessage("En ny planet har lagts till i ditt universum.");
+      showMessage(input.folderId ? "Anteckningen har lagts till i mappen." : "En ny planet har lagts till i ditt universum.");
     } catch (error) {
       formError.textContent = error.message || "Kunde inte skapa anteckningen.";
       formError.hidden = false;
@@ -769,6 +791,22 @@ export function createUI({
   });
   const titleEditor = document.querySelector("#detail-title-input");
   const contentEditor = document.querySelector("#detail-content-input");
+  const courseUrlEditor = document.querySelector("#detail-course-url-input");
+  courseUrlEditor.addEventListener("input", () => renderCourseLink(courseUrlEditor.value));
+  courseUrlEditor.addEventListener("change", () => {
+    if (!activeNoteId) return;
+    try {
+      onUpdateNote(activeNoteId, { courseUrl: courseUrlEditor.value.trim() });
+      const status = document.querySelector("#editor-save-status");
+      status.textContent = "Sparat";
+      status.className = "editor-save-status is-saved";
+    } catch (error) {
+      const status = document.querySelector("#editor-save-status");
+      status.textContent = "Kunde inte spara";
+      status.className = "editor-save-status is-error";
+      showMessage(error.message || "Kurslänken kunde inte sparas.", "error");
+    }
+  });
   function scheduleEditorSave() {
     if (!activeNoteId) return;
     const status = document.querySelector("#editor-save-status");

@@ -25,6 +25,21 @@ function createId() {
   return `note-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
+function normalizeCourseUrl(value, index) {
+  const raw = typeof value === "string" ? value.trim() : "";
+  if (!raw) return "";
+  let url;
+  try {
+    url = new URL(raw);
+  } catch (error) {
+    throw new TypeError(`Kurslänken i anteckning ${index + 1} är ogiltig.`, { cause: error });
+  }
+  if (!["http:", "https:"].includes(url.protocol)) {
+    throw new TypeError(`Kurslänken i anteckning ${index + 1} måste börja med http eller https.`);
+  }
+  return url.href;
+}
+
 function normalizeNote(note, index = 0) {
   if (!note || typeof note !== "object" || Array.isArray(note)) {
     throw new TypeError(`Anteckning ${index + 1} har ett ogiltigt format.`);
@@ -33,9 +48,10 @@ function normalizeNote(note, index = 0) {
   const title = typeof note.title === "string" ? note.title.trim() : "";
   const category = typeof note.category === "string" ? note.category.trim() : "";
   const content = typeof note.content === "string" ? note.content.trim() : "";
+  const courseUrl = normalizeCourseUrl(note.courseUrl, index);
 
-  if (!title || !category || !content) {
-    throw new TypeError(`Anteckning ${index + 1} måste ha titel, kategori och innehåll.`);
+  if (!title || !category || (!content && !courseUrl)) {
+    throw new TypeError(`Anteckning ${index + 1} måste ha titel, kategori och innehåll eller kurslänk.`);
   }
 
   const createdAt = typeof note.createdAt === "string" ? note.createdAt : new Date().toISOString();
@@ -44,6 +60,7 @@ function normalizeNote(note, index = 0) {
     title,
     category,
     content,
+    courseUrl,
     tags: Array.isArray(note.tags) ? note.tags.filter((tag) => typeof tag === "string") : [],
     importance: Number.isInteger(note.importance)
       ? Math.min(3, Math.max(1, note.importance))
