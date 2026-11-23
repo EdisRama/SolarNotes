@@ -15,7 +15,24 @@ function resetCamera() {
   controls.reset();
 }
 
-function createStars({ count, minRadius, maxRadius, size, opacity, seed }) {
+function createStarSpriteTexture() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 64;
+  canvas.height = 64;
+  const context = canvas.getContext("2d");
+  const gradient = context.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gradient.addColorStop(0, "rgba(255,255,255,1)");
+  gradient.addColorStop(0.18, "rgba(255,255,255,0.92)");
+  gradient.addColorStop(0.55, "rgba(255,255,255,0.38)");
+  gradient.addColorStop(1, "rgba(255,255,255,0)");
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, 64, 64);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
+function createStars({ count, minRadius, maxRadius, size, opacity, seed, spriteTexture }) {
   const positions = new Float32Array(count * 3);
   const colors = new Float32Array(count * 3);
   const random = createRandom(seed);
@@ -47,6 +64,8 @@ function createStars({ count, minRadius, maxRadius, size, opacity, seed }) {
 
   const material = new THREE.PointsMaterial({
     size,
+    map: spriteTexture,
+    alphaTest: 0.015,
     vertexColors: true,
     transparent: true,
     opacity,
@@ -62,11 +81,12 @@ function createStars({ count, minRadius, maxRadius, size, opacity, seed }) {
 
 function createStarfield(scene, lowPower) {
   const field = new THREE.Group();
+  const spriteTexture = createStarSpriteTexture();
   const layers = [
     { count: lowPower ? 1200 : 2600, minRadius: 48, maxRadius: 105, size: 0.085, opacity: 0.52, seed: 11 },
     { count: lowPower ? 850 : 1900, minRadius: 82, maxRadius: 155, size: 0.14, opacity: 0.7, seed: 23 },
     { count: lowPower ? 450 : 1000, minRadius: 125, maxRadius: 215, size: 0.2, opacity: 0.9, seed: 37 }
-  ].map(createStars);
+  ].map((config) => createStars({ ...config, spriteTexture }));
 
   layers.forEach((stars) => field.add(stars));
   scene.add(field);
