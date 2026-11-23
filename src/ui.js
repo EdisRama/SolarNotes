@@ -682,7 +682,6 @@ export function createUI({
     const category = document.querySelector("#detail-category");
     category.textContent = note.category;
     category.style.setProperty("--category-color", color);
-    document.querySelector("#detail-course-url-input").value = note.courseUrl || "";
     renderCourseLink(note.courseUrl);
     document.querySelector("#detail-title-input").value = note.title;
     document.querySelector("#detail-content-input").value = note.content;
@@ -828,22 +827,6 @@ export function createUI({
   });
   const titleEditor = document.querySelector("#detail-title-input");
   const contentEditor = document.querySelector("#detail-content-input");
-  const courseUrlEditor = document.querySelector("#detail-course-url-input");
-  courseUrlEditor.addEventListener("input", () => renderCourseLink(courseUrlEditor.value));
-  courseUrlEditor.addEventListener("change", () => {
-    if (!activeNoteId) return;
-    try {
-      onUpdateNote(activeNoteId, { courseUrl: courseUrlEditor.value.trim() });
-      const status = document.querySelector("#editor-save-status");
-      status.textContent = "Sparat";
-      status.className = "editor-save-status is-saved";
-    } catch (error) {
-      const status = document.querySelector("#editor-save-status");
-      status.textContent = "Kunde inte spara";
-      status.className = "editor-save-status is-error";
-      showMessage(error.message || "Kurslänken kunde inte sparas.", "error");
-    }
-  });
   function scheduleEditorSave() {
     if (!activeNoteId) return;
     const status = document.querySelector("#editor-save-status");

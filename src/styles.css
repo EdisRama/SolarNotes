@@ -189,7 +189,7 @@ button { color: inherit; }
 .detail-orb span { position: absolute; top: 16px; left: 20px; width: 15px; height: 9px; border-radius: 50%; background: rgba(255, 255, 255, 0.26); filter: blur(4px); transform: rotate(-38deg); }
 .detail-heading { text-align: center; }
 .category-pill { display: inline-block; padding: 5px 9px; border: 1px solid color-mix(in srgb, var(--category-color, #a78bfa), transparent 68%); border-radius: 20px; color: var(--category-color, #b7aaff); background: color-mix(in srgb, var(--category-color, #a78bfa), transparent 91%); font: 9px var(--mono); letter-spacing: 0.35px; }
-.course-link { display: block; width: fit-content; max-width: 100%; margin: 9px auto 0; padding: 6px 9px; border: 1px solid rgba(255,255,255,.16); border-radius: 5px; color: #ddd; background: rgba(255,255,255,.04); text-decoration: none; font: 9px var(--mono); overflow-wrap: anywhere; }
+.course-link { display: block; width: fit-content; max-width: 100%; margin: 0 0 8px; padding: 6px 9px; border: 1px solid rgba(255,255,255,.16); border-radius: 5px; color: #ddd; background: rgba(255,255,255,.04); text-decoration: none; font: 9px var(--mono); overflow-wrap: anywhere; }
 .course-link:hover { border-color: rgba(255,255,255,.38); color: #fff; background: rgba(255,255,255,.08); }
 .course-link:focus-visible { outline: 2px solid #bdbdbd; outline-offset: 2px; }
 .detail-heading h1 { margin: 13px 0 0; color: #f3f1ff; font: 500 25px/1.2 var(--display); letter-spacing: -0.7px; overflow-wrap: anywhere; }
