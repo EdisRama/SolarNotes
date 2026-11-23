@@ -52,6 +52,9 @@ export function createUI({
   let modalOpener;
   let activeNoteId = null;
   let categoriesExpanded = true;
+  let expandedFolderId = null;
+  let expandedFolderNoteId = null;
+  let creatingFolderId = null;
 
   function showMessage(message, type = "success") {
     window.clearTimeout(toastTimer);
@@ -401,8 +404,20 @@ export function createUI({
       return;
     }
     for (const folder of folders) {
+      const childNotes = state.notes
+        .filter((note) => note.folderId === folder.id)
+        .sort((left, right) => new Date(right.updatedAt) - new Date(left.updatedAt));
       const row = document.createElement("div");
       row.className = "folder-star-row";
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "folder-toggle";
+      const isExpanded = expandedFolderId === folder.id;
+      toggle.setAttribute("aria-expanded", String(isExpanded));
+      toggle.setAttribute("aria-label", `${isExpanded ? "Stäng" : "Öppna"} mappen ${folder.name}`);
+      const chevron = document.createElement("span");
+      chevron.className = "folder-chevron";
+      chevron.textContent = isExpanded ? "⌄" : "›";
       const star = document.createElement("span");
       star.className = "folder-star";
       star.textContent = "✦";
@@ -410,6 +425,155 @@ export function createUI({
       name.className = "folder-name";
       name.textContent = folder.name;
       name.title = folder.name;
+      const count = document.createElement("span");
+      count.className = "folder-note-count";
+      count.textContent = String(childNotes.length);
+      toggle.append(chevron, star, name, count);
+      toggle.addEventListener("click", () => {
+        expandedFolderId = isExpanded ? null : folder.id;
+        expandedFolderNoteId = null;
+        creatingFolderId = null;
+        renderPlanetFolders(planetId);
+      });
+      row.append(toggle);
+      if (isExpanded) {
+        const content = document.createElement("div");
+        content.className = "folder-content";
+        const noteList = document.createElement("div");
+        noteList.className = "folder-note-list";
+        if (childNotes.length === 0) {
+          const empty = document.createElement("p");
+          empty.className = "folder-empty";
+          empty.textContent = "Mappen är tom. Lägg till din första anteckning.";
+          noteList.append(empty);
+        }
+        for (const note of childNotes) {
+          const item = document.createElement("article");
+          item.className = "folder-note-item";
+          const noteButton = document.createElement("button");
+          noteButton.type = "button";
+          noteButton.className = "folder-note-toggle";
+          noteButton.setAttribute("aria-expanded", String(expandedFolderNoteId === note.id));
+          noteButton.textContent = note.title;
+          noteButton.addEventListener("click", () => {
+            expandedFolderNoteId = expandedFolderNoteId === note.id ? null : note.id;
+            creatingFolderId = null;
+            renderPlanetFolders(planetId);
+          });
+          item.append(noteButton);
+          if (expandedFolderNoteId === note.id) {
+            const editor = document.createElement("form");
+            editor.className = "folder-note-editor";
+            const titleInput = document.createElement("input");
+            titleInput.className = "form-input";
+            titleInput.maxLength = 80;
+            titleInput.required = true;
+            titleInput.setAttribute("aria-label", "Anteckningens titel");
+            titleInput.value = note.title;
+            const contentInput = document.createElement("textarea");
+            contentInput.className = "form-input form-textarea";
+            contentInput.maxLength = 5000;
+            contentInput.required = true;
+            contentInput.setAttribute("aria-label", "Anteckningens innehåll");
+            contentInput.value = note.content;
+            const save = document.createElement("button");
+            save.type = "submit";
+            save.className = "detail-action";
+            save.textContent = "Spara";
+            const remove = document.createElement("button");
+            remove.type = "button";
+            remove.className = "detail-action folder-note-delete";
+            remove.textContent = "Ta bort anteckning";
+            remove.addEventListener("click", () => {
+              if (!window.confirm(`Ta bort anteckningen "${note.title}" permanent?`)) return;
+              try {
+                onDeleteNote(note.id);
+                expandedFolderNoteId = null;
+                renderPlanetFolders(planetId);
+                showMessage("Anteckningen har tagits bort från mappen.");
+              } catch (error) {
+                showMessage(error.message || "Kunde inte ta bort anteckningen.", "error");
+              }
+            });
+            editor.append(titleInput, contentInput, save, remove);
+            editor.addEventListener("submit", (event) => {
+              event.preventDefault();
+              try {
+                onUpdateNote(note.id, { title: titleInput.value, content: contentInput.value });
+                expandedFolderNoteId = null;
+                renderPlanetFolders(planetId);
+                showMessage("Anteckningen har sparats.");
+              } catch (error) {
+                showMessage(error.message || "Kunde inte spara anteckningen.", "error");
+              }
+            });
+            item.append(editor);
+          } else {
+            const preview = document.createElement("p");
+            preview.className = "folder-note-preview";
+            preview.textContent = note.content;
+            item.append(preview);
+          }
+          noteList.append(item);
+        }
+        content.append(noteList);
+        const addNote = document.createElement("button");
+        addNote.type = "button";
+        addNote.className = "folder-add-note";
+        addNote.textContent = creatingFolderId === folder.id ? "Stäng formuläret" : "+ Ny anteckning";
+        addNote.addEventListener("click", () => {
+          creatingFolderId = creatingFolderId === folder.id ? null : folder.id;
+          expandedFolderNoteId = null;
+          renderPlanetFolders(planetId);
+        });
+        content.append(addNote);
+        if (creatingFolderId === folder.id) {
+          const form = document.createElement("form");
+          form.className = "folder-note-editor";
+          const titleInput = document.createElement("input");
+          titleInput.className = "form-input";
+          titleInput.maxLength = 80;
+          titleInput.required = true;
+          titleInput.placeholder = "Anteckningens titel";
+          const contentInput = document.createElement("textarea");
+          contentInput.className = "form-input form-textarea";
+          contentInput.maxLength = 5000;
+          contentInput.required = true;
+          contentInput.placeholder = "Skriv i mappen...";
+          const save = document.createElement("button");
+          save.type = "submit";
+          save.className = "detail-action";
+          save.textContent = "Spara och stäng mappen";
+          form.append(titleInput, contentInput, save);
+          form.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const parent = state.notes.find((note) => note.id === planetId);
+            if (!parent) {
+              showMessage("Planetens anteckning kunde inte hittas.", "error");
+              return;
+            }
+            try {
+              onCreate({
+                title: titleInput.value,
+                content: contentInput.value,
+                category: parent.category,
+                importance: 2,
+                folderId: folder.id,
+                planetId
+              });
+              expandedFolderId = null;
+              creatingFolderId = null;
+              renderPlanetFolders(planetId);
+              showMessage("Anteckningen har sparats och mappen fällts ihop.");
+            } catch (error) {
+              showMessage(error.message || "Kunde inte skapa anteckningen.", "error");
+            }
+          });
+          content.append(form);
+          window.requestAnimationFrame(() => titleInput.focus());
+        }
+        row.append(content);
+      }
       const actions = document.createElement("div");
       actions.className = "folder-actions";
       const move = document.createElement("select");
@@ -451,7 +615,7 @@ export function createUI({
         }
       });
       actions.append(move, up, down, rename, remove);
-      row.append(star, name, actions);
+      if (isExpanded) row.append(actions);
       list.append(row);
     }
   }

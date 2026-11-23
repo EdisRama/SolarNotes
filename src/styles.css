@@ -643,12 +643,27 @@ body, .app-shell, .main-workspace, .solar-system, .calendar-view, .content-works
 .planet-folder-header { display: flex; align-items: center; justify-content: space-between; margin: 10px 0 8px; }
 .folder-create-form { display: grid; grid-template-columns: 1fr auto; gap: 7px; margin-bottom: 9px; }
 .folder-create-form .form-input { min-height: 34px; }
-.folder-list { display: flex; max-height: 130px; flex-direction: column; gap: 5px; overflow-y: auto; margin-bottom: 10px; }
+.folder-list { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
 .folder-empty { margin: 6px 0 10px; color: #777; font-size: 10px; }
-.folder-star-row { display: grid; grid-template-columns: 22px minmax(55px, 1fr) auto; align-items: center; gap: 6px; min-height: 38px; padding: 5px 7px; border: 1px solid rgba(255,255,255,.09); border-radius: 6px; background: rgba(255,255,255,.025); }
+.folder-star-row { display: flex; flex-direction: column; overflow: hidden; border: 1px solid rgba(255,255,255,.1); border-radius: 6px; background: rgba(255,255,255,.025); }
+.folder-toggle { display: flex; width: 100%; min-height: 38px; align-items: center; gap: 8px; padding: 6px 9px; border: 0; color: #ddd; background: transparent; cursor: pointer; text-align: left; }
+.folder-toggle:hover { background: rgba(255,255,255,.045); }
+.folder-chevron { width: 10px; color: #888; font-size: 14px; }
 .folder-star { color: #e8e8e8; text-align: center; text-shadow: 0 0 10px rgba(255,255,255,.4); }
-.folder-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #ddd; font-size: 11px; }
-.folder-actions { display: flex; align-items: center; gap: 3px; }
+.folder-name { min-width: 0; flex: 1; overflow: hidden; color: #ddd; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.folder-note-count { color: #888; font: 9px var(--mono); }
+.folder-content { padding: 8px; border-top: 1px solid rgba(255,255,255,.08); }
+.folder-note-list { display: flex; flex-direction: column; gap: 5px; }
+.folder-note-item { padding: 7px 8px; border: 1px solid rgba(255,255,255,.08); border-radius: 5px; background: rgba(0,0,0,.12); }
+.folder-note-toggle { width: 100%; padding: 0; border: 0; color: #ddd; background: transparent; cursor: pointer; text-align: left; font-size: 11px; }
+.folder-note-toggle:hover { color: #fff; }
+.folder-note-preview { display: -webkit-box; margin: 5px 0 0; overflow: hidden; color: #888; font-size: 10px; line-height: 1.45; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.folder-note-editor { display: grid; gap: 7px; margin-top: 8px; }
+.folder-note-editor .form-input { min-height: 34px; }
+.folder-note-editor .form-textarea { min-height: 76px; }
+.folder-add-note { width: 100%; margin-top: 7px; padding: 7px; border: 1px dashed rgba(255,255,255,.15); border-radius: 5px; color: #aaa; background: transparent; cursor: pointer; font-size: 10px; }
+.folder-add-note:hover { border-color: rgba(255,255,255,.35); color: #fff; }
+.folder-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,.07); }
 .folder-actions button { min-width: 24px; height: 24px; padding: 0 5px; border: 1px solid rgba(255,255,255,.1); border-radius: 4px; color: #aaa; background: transparent; cursor: pointer; font-size: 9px; }
 .folder-actions button:hover { color: #fff; border-color: rgba(255,255,255,.35); }
 .folder-move-select { width: 78px; height: 24px; border: 1px solid rgba(255,255,255,.1); border-radius: 4px; color: #aaa; background: #141414; font-size: 9px; }
@@ -661,7 +676,6 @@ body, .app-shell, .main-workspace, .solar-system, .calendar-view, .content-works
 .editor-save-status.is-error { color: #fff; }
 
 @media (max-width: 760px) {
-  .folder-list { max-height: 92px; }
   .planet-editor { min-height: 100px; }
   .folder-move-select { width: 62px; }
 }

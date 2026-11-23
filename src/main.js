@@ -185,7 +185,12 @@ async function start() {
       syncPlanetFilters();
     },
     onCreate(input) {
-      const note = createNote(input);
+      let note = createNote(input);
+      if (note.folderId) {
+        const folder = folders.find((item) => item.id === note.folderId);
+        if (!folder) throw new Error("Den valda mappen kunde inte hittas.");
+        note = { ...note, planetId: folder.planetId };
+      }
       const updatedNotes = [...notes, note];
       const hasCategory = categories.some(
         (category) => category.name.toLocaleLowerCase("sv") === note.category.toLocaleLowerCase("sv")
@@ -197,7 +202,7 @@ async function start() {
       }
       persistNotes(updatedNotes);
       notes = updatedNotes;
-      if (planetSystem) planetSystem.add(note, notes.length - 1);
+      if (planetSystem && !note.folderId) planetSystem.add(note, notes.length - 1);
       refreshData();
       return true;
     },
@@ -226,7 +231,9 @@ async function start() {
       );
       const updatedNotes = notes
         .filter((note) => note.id !== id)
-        .map((note) => removedFolderIds.has(note.folderId) ? { ...note, folderId: "" } : note);
+        .map((note) =>
+          removedFolderIds.has(note.folderId) ? { ...note, folderId: "", planetId: "" } : note
+        );
       persistNotes(updatedNotes);
       const updatedFolders = folders.filter((folder) => folder.planetId !== id);
       persistFolders(updatedFolders);
@@ -249,8 +256,13 @@ async function start() {
     },
     onMoveFolder(id, planetId) {
       const updatedFolders = updateFolder(folders, id, { planetId });
+      const updatedNotes = notes.map((note) =>
+        note.folderId === id ? { ...note, planetId } : note
+      );
       persistFolders(updatedFolders);
+      persistNotes(updatedNotes);
       folders = updatedFolders;
+      notes = updatedNotes;
       refreshData();
     },
     onSortFolder(id, direction) {
@@ -275,7 +287,7 @@ async function start() {
       const updatedFolders = deleteFolder(folders, id);
       persistFolders(updatedFolders);
       const updatedNotes = notes.map((note) =>
-        note.folderId === id ? { ...note, folderId: "" } : note
+        note.folderId === id ? { ...note, folderId: "", planetId: "" } : note
       );
       persistNotes(updatedNotes);
       folders = updatedFolders;
@@ -316,8 +328,14 @@ async function start() {
       if (calendar) calendar.setEvents(updatedEvents);
       if (planetSystem) {
         for (const [index, note] of notes.entries()) {
-          if (!planetSystem.get(note.id)) planetSystem.add(note, index);
-          else planetSystem.updateNote(note);
+          const entry = planetSystem.get(note.id);
+          if (note.folderId) {
+            if (entry) planetSystem.remove(note.id);
+          } else if (!entry) {
+            planetSystem.add(note, index);
+          } else {
+            planetSystem.updateNote(note);
+          }
         }
       }
       refreshData();
@@ -408,7 +426,9 @@ async function start() {
     return;
   }
   planetSystem = createPlanetSystem(solarScene.scene, labelLayer);
-  notes.forEach((note, index) => planetSystem.add(note, index));
+  notes.forEach((note, index) => {
+    if (!note.folderId) planetSystem.add(note, index);
+  });
   ui.setCount(notes.filter((note) => !note.archived).length);
   ui.hideError();
   syncPlanetFilters();
