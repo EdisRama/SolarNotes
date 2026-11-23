@@ -266,18 +266,47 @@ export function createPlanetSystem(scene, labelLayer) {
     return orbit;
   }
 
+  function layoutOrbits() {
+    const orderedEntries = Array.from(entries.values()).sort((left, right) => left.order - right.order);
+    const orbitCount = Math.ceil(orderedEntries.length / PLANETS_PER_ORBIT);
+
+    orderedEntries.forEach((entry, index) => {
+      const orbitIndex = Math.floor(index / PLANETS_PER_ORBIT);
+      const positionInOrbit = index % PLANETS_PER_ORBIT;
+      const planetsOnOrbit = Math.min(
+        PLANETS_PER_ORBIT,
+        orderedEntries.length - orbitIndex * PLANETS_PER_ORBIT
+      );
+      const orbitRadius = INNER_ORBIT_RADIUS + orbitIndex * ORBIT_SPACING;
+      let orbit = orbits.get(orbitIndex);
+      if (!orbit) {
+        orbit = createOrbit(orbitRadius, "#777777");
+        orbits.set(orbitIndex, orbit);
+      }
+
+      entry.orbit = orbit;
+      entry.orbitIndex = orbitIndex;
+      entry.orbitRadius = orbitRadius;
+      const evenlySpacedAngle = (positionInOrbit / planetsOnOrbit) * Math.PI * 2 + orbitIndex * 0.28;
+      entry.speed = 0.11 / Math.sqrt(orbitRadius);
+      entry.startAngle = evenlySpacedAngle;
+      updatePosition(entry);
+    });
+
+    for (const [orbitIndex, orbit] of orbits) {
+      if (orbitIndex < orbitCount) continue;
+      scene.remove(orbit);
+      orbit.geometry.dispose();
+      orbit.material.dispose();
+      orbits.delete(orbitIndex);
+    }
+  }
+
   function add(note, index = entries.size) {
     if (entries.has(note.id)) return entries.get(note.id);
 
     const color = colorForCategory(note.category);
     const radius = planetRadius(note.importance);
-    const orbitIndex = Math.floor(index / PLANETS_PER_ORBIT);
-    const positionInOrbit = index % PLANETS_PER_ORBIT;
-    const orbitRadius = INNER_ORBIT_RADIUS + orbitIndex * ORBIT_SPACING;
-    const startAngle =
-      (positionInOrbit / PLANETS_PER_ORBIT) * Math.PI * 2 + orbitIndex * 0.28;
-    const speed =
-      (0.11 / Math.sqrt(orbitRadius)) * (1 + (positionInOrbit - (PLANETS_PER_ORBIT - 1) / 2) * 0.012);
     const categoryKey = note.category.toLowerCase();
     const isIce = categoryKey === "science";
     const isGasGiant = ["programming", "school", "work"].includes(categoryKey);
@@ -303,12 +332,6 @@ export function createPlanetSystem(scene, labelLayer) {
     atmosphere.renderOrder = 1;
     mesh.add(atmosphere);
 
-    let orbit = orbits.get(orbitIndex);
-    if (!orbit) {
-      orbit = createOrbit(orbitRadius, "#777777");
-      orbits.set(orbitIndex, orbit);
-    }
-
     const label = document.createElement("button");
     label.type = "button";
     label.className = "planet-label";
@@ -321,14 +344,15 @@ export function createPlanetSystem(scene, labelLayer) {
     const entry = {
       note,
       mesh,
-      orbit,
       label,
       color,
       radius,
-      orbitIndex,
-      orbitRadius,
-      startAngle,
-      speed,
+      order: Number.isFinite(index) ? index : entries.size,
+      orbit: null,
+      orbitIndex: 0,
+      orbitRadius: INNER_ORBIT_RADIUS,
+      startAngle: 0,
+      speed: 0.11 / Math.sqrt(INNER_ORBIT_RADIUS),
       rotationSpeed: 0.07 + (hashString(note.id) % 100) / 1000,
       matched: true,
       hovered: note.id === hoveredId,
@@ -336,7 +360,7 @@ export function createPlanetSystem(scene, labelLayer) {
       scaleFactor: 1
     };
     entries.set(note.id, entry);
-    updatePosition(entry);
+    layoutOrbits();
     applyFilters();
     return entry;
   }
@@ -379,7 +403,7 @@ export function createPlanetSystem(scene, labelLayer) {
     const angle = entry.startAngle + elapsed * entry.speed;
     entry.mesh.position.set(
       Math.cos(angle) * entry.orbitRadius,
-      Math.sin(angle * 0.65) * 0.42,
+      0,
       Math.sin(angle) * entry.orbitRadius
     );
   }
@@ -490,6 +514,13 @@ export function createPlanetSystem(scene, labelLayer) {
     entry.label.remove();
     entry.mesh.material?.dispose();
     entries.delete(id);
+    Array.from(entries.values())
+      .sort((left, right) => left.order - right.order)
+      .forEach((remainingEntry, order) => {
+        remainingEntry.order = order;
+      });
+    layoutOrbits();
+    applyFilters();
   }
 
   return {

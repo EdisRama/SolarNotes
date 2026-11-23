@@ -344,16 +344,20 @@ export function createSolarScene(container, initialQuality = "auto") {
   renderer.domElement.setAttribute("aria-label", "3D-solsystem. Klicka på en planet för att öppna anteckningen.");
   container.prepend(renderer.domElement);
 
-  const controls = new OrbitControls(camera, renderer.domElement);
+  const controls = new OrbitControls(camera, container);
   controls.enableDamping = true;
   controls.dampingFactor = 0.055;
   controls.minDistance = 7;
   controls.maxDistance = 75;
   controls.maxPolarAngle = Math.PI * 0.82;
   controls.target.set(0, 0, 0);
-  controls.autoRotateSpeed = 0.45;
+  let focusTarget = null;
+  let focusCamera = null;
+  let resettingCamera = false;
   controls.addEventListener("start", () => {
-    controls.autoRotate = false;
+    focusTarget = null;
+    focusCamera = null;
+    resettingCamera = false;
   });
   const neutralCameraPosition = camera.position.clone();
   const neutralTarget = controls.target.clone();
@@ -413,20 +417,14 @@ export function createSolarScene(container, initialQuality = "auto") {
   setQuality(initialQuality);
   resize();
 
-  let focusTarget = null;
-  let focusCamera = null;
-  let resumeAutoRotateAfterFocus = false;
-
   function resetCamera() {
     focusTarget = neutralTarget.clone();
     focusCamera = neutralCameraPosition.clone();
-    resumeAutoRotateAfterFocus = true;
-    controls.autoRotate = false;
+    resettingCamera = true;
   }
 
   function focus(position, distance = 9) {
-    resumeAutoRotateAfterFocus = false;
-    controls.autoRotate = false;
+    resettingCamera = false;
     const direction = camera.position.clone().sub(controls.target).normalize();
     if (direction.lengthSq() === 0) direction.set(0, 0.35, 1);
     focusTarget = position.clone();
@@ -446,10 +444,9 @@ export function createSolarScene(container, initialQuality = "auto") {
       camera.position.copy(focusCamera);
       focusTarget = null;
       focusCamera = null;
-      if (resumeAutoRotateAfterFocus) {
-        resumeAutoRotateAfterFocus = false;
+      if (resettingCamera) {
+        resettingCamera = false;
         controls.reset();
-        controls.autoRotate = true;
       }
     }
   }

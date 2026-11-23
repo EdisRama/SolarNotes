@@ -977,7 +977,10 @@ export function createUI({
       if (!modal.hidden) closeModal(modal, form);
       else if (!categoryModal.hidden) closeModal(categoryModal, categoryForm);
       else if (appShell.classList.contains("is-drawer-open")) setDrawerOpen(false);
-      else if (state.workspace === "universe") onNavigate("reset-camera");
+      else if (state.workspace === "universe") {
+        if (!panel.hidden) closeDetails();
+        onNavigate("reset-camera");
+      }
       return;
     }
     const activeModal = !modal.hidden ? modal : !categoryModal.hidden ? categoryModal : null;
