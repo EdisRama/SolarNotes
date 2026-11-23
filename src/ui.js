@@ -210,7 +210,7 @@ export function createUI({
         courseLink.href = courseUrl;
         courseLink.target = "_blank";
         courseLink.rel = "noopener noreferrer";
-        courseLink.textContent = "Öppna kursen ↗";
+        courseLink.textContent = "Öppna Itslearning ↗";
         card.append(courseLink);
       }
 
