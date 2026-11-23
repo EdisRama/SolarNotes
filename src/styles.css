@@ -447,6 +447,10 @@ button.calendar-cell:hover { z-index: 1; border-color: rgba(133, 161, 222, 0.38)
 .note-card-title-button:hover { color: #fff; }
 .note-card-title-button:focus-visible { border-radius: 2px; outline: 2px solid #bdbdbd; outline-offset: 3px; }
 .note-card p { display: -webkit-box; margin: 0; overflow: hidden; color: #919bae; font-size: 11px; line-height: 1.6; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.note-card p a { color: #d7d7d7; text-decoration-color: rgba(215,215,215,.45); overflow-wrap: anywhere; }
+.note-card p a:hover, .note-card-course-link:hover { color: #fff; text-decoration-color: #fff; }
+.note-card-course-link { display: inline-block; width: fit-content; max-width: 100%; margin-top: 9px; padding: 6px 8px; border: 1px solid rgba(255,255,255,.16); border-radius: 4px; color: #ddd; background: rgba(255,255,255,.04); text-decoration: none; font: 9px var(--mono); }
+.note-card-course-link:focus-visible, .note-card p a:focus-visible { outline: 2px solid #bdbdbd; outline-offset: 2px; }
 .note-card-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
 .note-card-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; margin-top: 12px; }
 .note-card-actions button { padding: 4px 7px; border: 1px solid rgba(151, 166, 199, 0.12); border-radius: 4px; color: #929cb0; background: transparent; cursor: pointer; font: 8px var(--mono); }

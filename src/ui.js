@@ -134,6 +134,39 @@ export function createUI({
     return state.notes.filter((note) => !note.archived);
   }
 
+  function safeExternalUrl(value) {
+    const raw = typeof value === "string" ? value.trim() : "";
+    if (!raw) return "";
+    try {
+      const url = new URL(raw);
+      return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+    } catch {
+      return "";
+    }
+  }
+
+  function appendLinkedText(target, text) {
+    const urlPattern = /https?:\/\/[^\s<>"']+/gi;
+    let cursor = 0;
+    for (const match of text.matchAll(urlPattern)) {
+      const rawUrl = match[0];
+      const trailingPunctuation = rawUrl.match(/[.,!?;:)\]]+$/)?.[0] || "";
+      const candidate = rawUrl.slice(0, rawUrl.length - trailingPunctuation.length);
+      const href = safeExternalUrl(candidate);
+      if (!href) continue;
+
+      target.append(document.createTextNode(text.slice(cursor, match.index)));
+      const link = document.createElement("a");
+      link.href = href;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = candidate;
+      target.append(link, document.createTextNode(trailingPunctuation));
+      cursor = match.index + rawUrl.length;
+    }
+    target.append(document.createTextNode(text.slice(cursor)));
+  }
+
   function renderNoteCollection(target, notes) {
     target.replaceChildren();
     if (notes.length === 0) {
@@ -167,8 +200,19 @@ export function createUI({
       title.textContent = note.title;
       title.addEventListener("click", () => onSelect(note.id));
       const content = document.createElement("p");
-      content.textContent = note.content;
+      appendLinkedText(content, note.content);
       card.append(top, title, content);
+
+      const courseUrl = safeExternalUrl(note.courseUrl);
+      if (courseUrl) {
+        const courseLink = document.createElement("a");
+        courseLink.className = "note-card-course-link";
+        courseLink.href = courseUrl;
+        courseLink.target = "_blank";
+        courseLink.rel = "noopener noreferrer";
+        courseLink.textContent = "Öppna kursen ↗";
+        card.append(courseLink);
+      }
 
       if (note.tags.length) {
         const tags = document.createElement("div");
@@ -392,21 +436,14 @@ export function createUI({
 
   function renderCourseLink(value) {
     const link = document.querySelector("#detail-course-link");
-    const raw = typeof value === "string" ? value.trim() : "";
-    if (!raw) {
+    const href = safeExternalUrl(value);
+    if (!href) {
       link.hidden = true;
       link.removeAttribute("href");
       return;
     }
-    try {
-      const url = new URL(raw);
-      if (!["http:", "https:"].includes(url.protocol)) throw new TypeError("Ogiltigt protokoll.");
-      link.href = url.href;
-      link.hidden = false;
-    } catch {
-      link.hidden = true;
-      link.removeAttribute("href");
-    }
+    link.href = href;
+    link.hidden = false;
   }
 
   function renderPlanetFolders(planetId) {
